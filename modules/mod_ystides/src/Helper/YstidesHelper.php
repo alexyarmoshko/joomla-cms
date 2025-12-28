@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\Registry\Registry;
+use Joomla\Module\Ystides\Site\Helper\StationCatalog;
 use Throwable;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -65,13 +66,12 @@ class YstidesHelper
     public function getLayoutVariables(Registry $params): array
     {
         $stationId   = (string) $params->get('station_id', '');
-        $stationName = (string) $params->get('station_name', '');
         $daysRange   = max(1, (int) $params->get('days_range', 7));
 
         $startDate = $this->getUtcStartOfDay();
         $endDate   = (clone $startDate)->modify('+' . $daysRange . ' days');
 
-        $stationDisplay = $stationName ?: ($stationId ?: Text::_('MOD_YSTIDES_STATION_PLACEHOLDER'));
+        $stationDisplay = $stationId ? StationCatalog::getStationLabel($stationId) : Text::_('MOD_YSTIDES_STATION_PLACEHOLDER');
 
         $dbReady   = false;
         $dbError   = '';
@@ -89,7 +89,6 @@ class YstidesHelper
         return [
             'stationId'      => $stationId,
             'stationName'    => $stationDisplay,
-            'stationRawName' => $stationName,
             'daysRange'      => $daysRange,
             'dateRangeStart' => $this->formatDate($startDate),
             'dateRangeEnd'   => $this->formatDate($endDate),

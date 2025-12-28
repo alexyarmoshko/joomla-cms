@@ -18,6 +18,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
+use Joomla\Module\Ystides\Site\Helper\StationCatalog;
 use RuntimeException;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -60,6 +61,7 @@ class DatabaseHelper
 
         $this->enableForeignKeys($db);
         $this->createSchema($db);
+        $this->seedStations($db);
 
         return [
             'driver' => $db,
@@ -142,12 +144,12 @@ CREATE TABLE IF NOT EXISTS TideStations (
     StationName TEXT,
     LonDegE TEXT,
     LatDegN TEXT,
-    MTR REAL,
-    RefStationID TEXT,
-    RefStationHWTimeOffset TEXT,
-    RefStationLWTimeOffset TEXT,
-    RefStationHWLOffset REAL,
-    RefStationLWLOffset REAL
+    MTR REAL DEFAULT NULL,
+    RefStationID TEXT DEFAULT NULL,
+    RefStationHWTimeOffset TEXT DEFAULT NULL,
+    RefStationLWTimeOffset TEXT DEFAULT NULL,
+    RefStationHWLOffset REAL DEFAULT NULL,
+    RefStationLWLOffset REAL DEFAULT NULL
 );
 SQL;
 
@@ -156,7 +158,7 @@ CREATE TABLE IF NOT EXISTS TideData (
     StationID TEXT NOT NULL,
     DateTime TEXT NOT NULL,
     TideCategory TEXT NOT NULL,
-    TideCoefficient INTEGER,
+    TideCoefficient INTEGER DEFAULT NULL,
     WLM REAL,
     WLODMM REAL,
     PRIMARY KEY (StationID, DateTime),
@@ -170,6 +172,28 @@ SQL;
             $db->setQuery($sql);
             $db->execute();
         }
+    }
+
+    /**
+     * Seed TideStations with the static catalog when empty.
+     *
+     * @param   DatabaseInterface  $db  Database connection.
+     *
+     * @return  void
+     *
+     * @since   1.0.1
+     */
+    private function seedStations(DatabaseInterface $db): void
+    {
+        $db->setQuery('SELECT COUNT(*) FROM TideStations');
+        $count = (int) $db->loadResult();
+
+        if ($count > 0) {
+            return;
+        }
+
+        $stations = StationCatalog::getStations();
+        $this->upsertStations($db, $stations);
     }
 
     /**
@@ -188,7 +212,7 @@ SQL;
             return;
         }
 
-        $sql = <<<SQL
+        $baseSql = <<<SQL
 INSERT INTO TideStations (
     StationID,
     StationName,
@@ -200,7 +224,7 @@ INSERT INTO TideStations (
     RefStationLWTimeOffset,
     RefStationHWLOffset,
     RefStationLWLOffset
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT(StationID) DO UPDATE SET
     StationName = excluded.StationName,
     LonDegE = excluded.LonDegE,
@@ -213,24 +237,43 @@ ON CONFLICT(StationID) DO UPDATE SET
     RefStationLWLOffset = excluded.RefStationLWLOffset;
 SQL;
 
-        $stmt = $db->prepare($sql);
-
         foreach ($stations as $station) {
             $values = [
-                $station['StationID'] ?? null,
-                $station['StationName'] ?? null,
-                $station['LonDegE'] ?? null,
-                $station['LatDegN'] ?? null,
-                $station['MTR'] ?? null,
-                $station['RefStationID'] ?? null,
-                $station['RefStationHWTimeOffset'] ?? null,
-                $station['RefStationLWTimeOffset'] ?? null,
-                $station['RefStationHWLOffset'] ?? null,
-                $station['RefStationLWLOffset'] ?? null,
+                $this->quoteNullable($db, $station['StationID'] ?? null),
+                $this->quoteNullable($db, $station['StationName'] ?? null),
+                $this->quoteNullable($db, $station['LonDegE'] ?? null),
+                $this->quoteNullable($db, $station['LatDegN'] ?? null),
+                $this->quoteNullable($db, $station['MTR'] ?? null),
+                $this->quoteNullable($db, $station['RefStationID'] ?? null),
+                $this->quoteNullable($db, $station['RefStationHWTimeOffset'] ?? null),
+                $this->quoteNullable($db, $station['RefStationLWTimeOffset'] ?? null),
+                $this->quoteNullable($db, $station['RefStationHWLOffset'] ?? null),
+                $this->quoteNullable($db, $station['RefStationLWLOffset'] ?? null),
             ];
 
-            $stmt->execute($values);
+            $sql = sprintf($baseSql, ...$values);
+            $db->setQuery($sql);
+            $db->execute();
         }
+    }
+
+    /**
+     * Quote a value, allowing NULL.
+     *
+     * @param   DatabaseInterface  $db     Database connection.
+     * @param   mixed              $value  Value to quote.
+     *
+     * @return  string
+     *
+     * @since   1.0.1
+     */
+    private function quoteNullable(DatabaseInterface $db, $value): string
+    {
+        if ($value === null || $value === '') {
+            return 'NULL';
+        }
+
+        return $db->quote($value);
     }
 
 }
