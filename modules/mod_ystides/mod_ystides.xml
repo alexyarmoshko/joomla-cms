@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="module" client="site" method="upgrade">
+	<name>mod_ystides</name>
+	<author>YSTides</author>
+	<creationDate>2025-02</creationDate>
+	<copyright>(C) 2025 YSTides</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>admin@example.com</authorEmail>
+	<authorUrl>https://www.joomla.org</authorUrl>
+	<version>1.0.1</version>
+	<description>MOD_YSTIDES_XML_DESCRIPTION</description>
+	<namespace path="src">Joomla\Module\Ystides</namespace>
+	<files>
+		<folder module="mod_ystides">services</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>
+	</files>
+	<languages>
+		<language tag="en-GB">language/en-GB/mod_ystides.ini</language>
+		<language tag="en-GB">language/en-GB/mod_ystides.sys.ini</language>
+	</languages>
+	<config>
+		<fields name="params">
+			<fieldset name="basic" label="COM_MODULES_BASIC_FIELDSET_LABEL">
+				<field
+					name="station_id"
+					type="list"
+					label="MOD_YSTIDES_FIELD_STATION_LABEL"
+					description="MOD_YSTIDES_FIELD_STATION_DESC"
+					default=""
+					filter="string"
+					>
+					<option value="">MOD_YSTIDES_OPTION_SELECT_STATION</option>
+				</field>
+
+				<field
+					name="station_name"
+					type="text"
+					label="MOD_YSTIDES_FIELD_STATION_NAME_LABEL"
+					description="MOD_YSTIDES_FIELD_STATION_NAME_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="days_range"
+					type="number"
+					label="MOD_YSTIDES_FIELD_DAYS_RANGE_LABEL"
+					description="MOD_YSTIDES_FIELD_DAYS_RANGE_DESC"
+					default="7"
+					filter="integer"
+					min="1"
+					max="60"
+				/>
+			</fieldset>
+
+			<fieldset name="advanced">
+				<field
+					name="layout"
+					type="modulelayout"
+					label="JFIELD_ALT_LAYOUT_LABEL"
+					class="form-select"
+					validate="moduleLayout"
+				/>
+
+				<field
+					name="moduleclass_sfx"
+					type="textarea"
+					label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+					rows="3"
+					validate="CssIdentifier"
+				/>
+
+				<field
+					name="cache"
+					type="list"
+					label="COM_MODULES_FIELD_CACHING_LABEL"
+					default="0"
+					filter="integer"
+					validate="options"
+					>
+					<option value="1">JGLOBAL_USE_GLOBAL</option>
+					<option value="0">COM_MODULES_FIELD_VALUE_NOCACHING</option>
+				</field>
+
+				<field
+					name="cache_time"
+					type="number"
+					label="COM_MODULES_FIELD_CACHE_TIME_LABEL"
+					default="900"
+					filter="integer"
+				/>
+
+				<field
+					name="cachemode"
+					type="hidden"
+					default="static"
+					>
+					<option value="static"></option>
+				</field>
+			</fieldset>
+		</fields>
+	</config>
+</extension>
