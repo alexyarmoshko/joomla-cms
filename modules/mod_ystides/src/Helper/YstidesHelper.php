@@ -207,7 +207,8 @@ class YstidesHelper
                     'time'    => $startTime . ' - ' . $endTime,
                     'tooltip' => $startFull . ' - ' . $endFull,
                     'wlm'     => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
-                    'symbol'  => $symbol,
+                    'symbol'  => $symbol['symbol'],
+                    'hint'    => $symbol['label'],
                     'raw'     => $group,
                 ];
             },
@@ -268,21 +269,22 @@ class YstidesHelper
     }
 
     /**
-     * Get a display symbol for a category.
+     * Get display symbol and label for a category.
      *
      * @param   string  $category  Tide category.
      *
-     * @return  string
+     * @return  array{symbol:string,label:string}
      *
      * @since   1.0.1
      */
-    private function categorySymbol(string $category): string
+    private function categorySymbol(string $category): array
     {
         return match ($category) {
-            'h' => '▲',
-            'l' => '▼',
-            'e' => '↘',
-            default => '↗',
+            'h' => ['symbol' => '▲', 'label' => Text::_('MOD_YSTIDES_HIGH_WATER')],
+            'l' => ['symbol' => '▼', 'label' => Text::_('MOD_YSTIDES_LOW_WATER')],
+            'e' => ['symbol' => '↘', 'label' => ''],
+            'f' => ['symbol' => '↗', 'label' => ''],
+            default => ['symbol' => '?', 'label' => ''],
         };
     }
 }

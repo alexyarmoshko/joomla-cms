@@ -31,31 +31,31 @@
 					filter="string"
 					>
 					<option value="">MOD_YSTIDES_OPTION_SELECT_STATION</option>
-					<option value="Achill_Island_MODELLED">Achill Island MODELLED</option>
+					<option value="Achill_Island_MODELLED">Achill Island</option>
 					<option value="Aranmore">Aranmore</option>
 					<option value="Arklow">Arklow</option>
 					<option value="Ballycotton">Ballycotton</option>
 					<option value="Ballyglass">Ballyglass</option>
-					<option value="Bray_Harbour_MODELLED">Bray Harbour MODELLED</option>
+					<option value="Bray_Harbour_MODELLED">Bray Harbour</option>
 					<option value="Buncranna">Buncranna</option>
-					<option value="Carrigaholt_MODELLED">Carrigaholt MODELLED</option>
+					<option value="Carrigaholt_MODELLED">Carrigaholt</option>
 					<option value="Castletownbere">Castletownbere</option>
-					<option value="Clare_Island_MODELLED">Clare Island MODELLED</option>
-					<option value="Crosshaven_MODELLED">Crosshaven MODELLED</option>
+					<option value="Clare_Island_MODELLED">Clare Island</option>
+					<option value="Crosshaven_MODELLED">Crosshaven</option>
 					<option value="Dingle">Dingle</option>
 					<option value="Dublin_Port">Dublin Port</option>
-					<option value="Dungarvan_MODELLED">Dungarvan MODELLED</option>
+					<option value="Dungarvan_MODELLED">Dungarvan</option>
 					<option value="Dunmore">Dunmore</option>
 					<option value="Fenit">Fenit</option>
 					<option value="Galway">Galway</option>
 					<option value="Howth">Howth</option>
 					<option value="Inishmore">Inishmore</option>
-					<option value="Killary_Harbour_MODELLED">Killary Harbour MODELLED</option>
+					<option value="Killary_Harbour_MODELLED">Killary Harbour</option>
 					<option value="Killybegs">Killybegs</option>
 					<option value="Kilrush">Kilrush</option>
-					<option value="Kinsale_MODELLED">Kinsale MODELLED</option>
-					<option value="Lahinch_MODELLED">Lahinch MODELLED</option>
-					<option value="Letterfrack_MODELLED">Letterfrack MODELLED</option>
+					<option value="Kinsale_MODELLED">Kinsale</option>
+					<option value="Lahinch_MODELLED">Lahinch</option>
+					<option value="Letterfrack_MODELLED">Letterfrack</option>
 					<option value="Malin_Head">Malin Head</option>
 					<option value="Port_Oriel">Port Oriel</option>
 					<option value="Ringaskiddy">Ringaskiddy</option>
@@ -65,10 +65,10 @@
 					<option value="Skerries">Skerries</option>
 					<option value="Sligo">Sligo</option>
 					<option value="Tom_Clarke_Bridge">Tom Clarke Bridge</option>
-					<option value="Tory_Island_MODELLED">Tory Island MODELLED</option>
+					<option value="Tory_Island_MODELLED">Tory Island</option>
 					<option value="Union_Hall">Union Hall</option>
 					<option value="Wexford">Wexford</option>
-					<option value="Wicklow_MODELLED">Wicklow MODELLED</option>
+					<option value="Wicklow_MODELLED">Wicklow</option>
 				</field>
 
 				<field
@@ -79,7 +79,7 @@
 					default="7"
 					filter="integer"
 					min="1"
-					max="60"
+					max="14"
 				/>
 			</fieldset>
 

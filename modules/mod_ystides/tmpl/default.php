@@ -34,7 +34,7 @@ $rowsData       = $rows ?? [];
 		<thead>
 			<tr>
 				<th colspan="3" class="mod-ystides-table-header">
-					<?php echo htmlspecialchars($stationHeader, ENT_QUOTES, 'UTF-8'); ?>
+					<?php echo Text::sprintf('MOD_YSTIDES_HEADER_DESC', htmlspecialchars($stationHeader, ENT_QUOTES, 'UTF-8')); ?>
 				</th>
 			</tr>
 			<tr>
@@ -58,7 +58,7 @@ $rowsData       = $rows ?? [];
 						<td class="mod-ystides-table-data-col1" title="<?php echo htmlspecialchars($row['tooltip'], ENT_QUOTES, 'UTF-8'); ?>">
 							<?php echo htmlspecialchars($row['time'], ENT_QUOTES, 'UTF-8'); ?>
 						</td>
-						<td class="mod-ystides-table-data-col2" >
+						<td class="mod-ystides-table-data-col2" title="<?php echo htmlspecialchars($row['hint'], ENT_QUOTES, 'UTF-8'); ?>">
 							<?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?>
 						</td>
 					</tr>
