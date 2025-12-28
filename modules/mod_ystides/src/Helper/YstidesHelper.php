@@ -183,10 +183,11 @@ class YstidesHelper
             ->from($db->quoteName('TideData'))
             ->where($db->quoteName('StationID') . ' = ' . $db->quote($stationId))
             ->where($db->quoteName('DateTime') . ' BETWEEN ' . $db->quote($start) . ' AND ' . $db->quote($end))
+            ->where($db->quoteName('TideCategory') . ' IN (' . $db->quote('h') . ',' . $db->quote('l') . ')')
             ->order($db->quoteName('DateTime') . ' ASC');
 
         $db->setQuery($query);
-        $rows = $db->loadAssocList();
+            $rows = $db->loadAssocList();
 
         return array_map(
             function ($row) {
@@ -194,7 +195,7 @@ class YstidesHelper
                 $symbol   = $this->categorySymbol($category);
 
                 return [
-                    'time'   => HTMLHelper::_('date', $row['DateTime'], 'H:i', 'UTC'),
+                    'time'   => HTMLHelper::_('date', $row['DateTime'], Text::_('DATE_FORMAT_LC4') . ' H:i', 'UTC'),
                     'wlm'    => $row['WLM'] !== null ? number_format((float) $row['WLM'], 2) : '',
                     'symbol' => $symbol,
                     'raw'    => $row,
