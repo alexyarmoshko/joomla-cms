@@ -15,6 +15,7 @@ use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Log\Log;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
@@ -46,6 +47,7 @@ class DatabaseHelper
         $fullPath = $this->buildDatabasePath();
 
         if (!extension_loaded('sqlite3')) {
+            Log::add(Text::_('MOD_YSTIDES_ERR_SQLITE_MISSING'), Log::ERROR, 'mod_ystides');
             throw new RuntimeException(Text::_('MOD_YSTIDES_ERR_SQLITE_MISSING'));
         }
 

@@ -17,11 +17,16 @@ $stationHeader  = $stationName ?? '';
 $rangeStart     = $dateRangeStart ?? '';
 $rangeEnd       = $dateRangeEnd ?? '';
 $dbErrorMessage = $dbError ?? '';
+$fetchErrorMessage = $fetchError ?? '';
 ?>
 <div class="mod-ystides<?php echo htmlspecialchars($moduleClassSfx, ENT_QUOTES, 'UTF-8'); ?>">
 	<?php if ($dbErrorMessage !== '') : ?>
 		<div class="alert alert-warning">
 			<?php echo htmlspecialchars($dbErrorMessage, ENT_QUOTES, 'UTF-8'); ?>
+		</div>
+	<?php elseif ($fetchErrorMessage !== '') : ?>
+		<div class="alert alert-warning">
+			<?php echo htmlspecialchars($fetchErrorMessage, ENT_QUOTES, 'UTF-8'); ?>
 		</div>
 	<?php else : ?>
 	<table class="table table-striped mod-ystides__table">

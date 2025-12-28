@@ -14,8 +14,10 @@ use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Log\Log;
 use Joomla\Registry\Registry;
 use Joomla\Module\Ystides\Site\Helper\StationCatalog;
+use Joomla\Module\Ystides\Site\Helper\TideDataFetcher;
 use Throwable;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -38,20 +40,30 @@ class YstidesHelper
     private DatabaseHelper $databaseHelper;
 
     /**
+     * Tide data fetcher.
+     *
+     * @var    TideDataFetcher
+     * @since  1.0.1
+     */
+    private TideDataFetcher $tideDataFetcher;
+
+    /**
      * Constructor.
      *
      * @param   mixed                 $config           Optional config (ignored when called from HelperFactory).
      * @param   DatabaseHelper|null   $databaseHelper   Optional database helper for testing/overrides.
+     * @param   TideDataFetcher|null  $tideDataFetcher  Optional fetcher helper for testing/overrides.
      *
      * @since   1.0.1
      */
-    public function __construct($config = null, ?DatabaseHelper $databaseHelper = null)
+    public function __construct($config = null, ?DatabaseHelper $databaseHelper = null, ?TideDataFetcher $tideDataFetcher = null)
     {
         if ($config instanceof DatabaseHelper && $databaseHelper === null) {
             $databaseHelper = $config;
         }
 
         $this->databaseHelper = $databaseHelper ?? new DatabaseHelper();
+        $this->tideDataFetcher = $tideDataFetcher ?? new TideDataFetcher();
     }
 
     /**
@@ -66,16 +78,17 @@ class YstidesHelper
     public function getLayoutVariables(Registry $params): array
     {
         $stationId   = (string) $params->get('station_id', '');
-        $daysRange   = max(1, (int) $params->get('days_range', 7));
+        $daysRange   = max(1, (int) $params->get('days_range', 7)) - 1;
 
         $startDate = $this->getUtcStartOfDay();
-        $endDate   = (clone $startDate)->modify('+' . $daysRange . ' days');
+        $endDate   = (clone $startDate)->modify('+' . max(0, $daysRange) . ' days');
 
         $stationDisplay = $stationId ? StationCatalog::getStationLabel($stationId) : Text::_('MOD_YSTIDES_STATION_PLACEHOLDER');
 
         $dbReady   = false;
         $dbError   = '';
         $dbPath    = '';
+        $fetchError = '';
 
         try {
             $dbInfo  = $this->databaseHelper->prepareDatabase($params);
@@ -84,6 +97,17 @@ class YstidesHelper
         } catch (Throwable $exception) {
             $dbError = Text::sprintf('MOD_YSTIDES_ERR_DB_INIT', $exception->getMessage());
             Factory::getApplication()->enqueueMessage($dbError, 'warning');
+            Log::add($exception->getMessage(), Log::ERROR, 'mod_ystides');
+        }
+
+        if ($dbReady && $stationId !== '') {
+            try {
+                $this->tideDataFetcher->ensureRange($dbInfo['driver'], $stationId, $startDate, $endDate);
+            } catch (Throwable $exception) {
+                $fetchError = Text::sprintf('MOD_YSTIDES_ERR_FETCH', $exception->getMessage());
+                Factory::getApplication()->enqueueMessage($fetchError, 'warning');
+                Log::add($exception->getMessage(), Log::ERROR, 'mod_ystides');
+            }
         }
 
         return [
@@ -95,6 +119,7 @@ class YstidesHelper
             'dbReady'        => $dbReady,
             'dbPath'         => $dbPath,
             'dbError'        => $dbError,
+            'fetchError'     => $fetchError,
         ];
     }
 
