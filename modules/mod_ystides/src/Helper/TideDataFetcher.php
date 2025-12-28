@@ -242,13 +242,13 @@ class TideDataFetcher
             $value = $row['WLM'];
 
             if ($index === 0 || $previousValue === null || $value === null) {
-                $row['TideCategory'] = $previousCategory;
-            } elseif ($value < $previousValue) {
-                $row['TideCategory'] = 'e';
+                $row['TideCategory'] = $previousCategory === '' ? 'f' : $previousCategory;
             } elseif ($value > $previousValue) {
-                $row['TideCategory'] = 'f';
+                $row['TideCategory'] = 'f'; // rising -> flooding
+            } elseif ($value < $previousValue) {
+                $row['TideCategory'] = 'e'; // falling -> ebbing
             } else {
-                $row['TideCategory'] = $previousCategory;
+                $row['TideCategory'] = $previousCategory === '' ? 'f' : $previousCategory;
             }
 
             $previousCategory = $row['TideCategory'];
@@ -256,6 +256,38 @@ class TideDataFetcher
         }
 
         unset($row);
+
+        // Reverse pass to assign highs (h) and lows (l) at trend changes.
+        $first_item_idx = count($rows) - 1;
+        $last_item_idx = 1;
+
+        for ($i = $first_item_idx; $i > $last_item_idx; $i--) {
+            $currCat = ($rows[$i]['TideCategory'] ?? '') . ($rows[$i - 1]['TideCategory'] ?? '');
+            $newCat = '';
+
+            switch ($currCat) {
+                case 'ef':
+                    $newCat = 'h';
+                    break;
+                case 'fe':
+                    $newCat = 'l';
+                    break;
+                default:
+                    continue 2;
+            }
+
+            if ($newCat !== '') {
+                $wlmTarget = $rows[$i-1]['WLM'];
+
+                for ($j = $i - 1; $j >= 0; $j--) {
+                    if ($rows[$j]['WLM'] === $wlmTarget) {
+                        $rows[$j]['TideCategory'] = $newCat;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
 
         return $rows;
     }
