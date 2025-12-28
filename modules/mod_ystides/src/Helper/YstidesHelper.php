@@ -175,8 +175,9 @@ class YstidesHelper
      */
     private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate): array
     {
-        $start = $startDate->format('Y-m-d 00:00:00');
-        $end   = $endDate->format('Y-m-d 23:59:59');
+        // Stored datetimes use ISO format with "T" and "Z" (e.g. 2025-12-28T12:30:00Z)
+        $start = $startDate->format('Y-m-d') . 'T00:00:00Z';
+        $end   = $endDate->format('Y-m-d') . 'T23:59:59Z';
 
         $query = $db->getQuery(true)
             ->select([$db->quoteName('DateTime'), $db->quoteName('WLM'), $db->quoteName('TideCategory')])
