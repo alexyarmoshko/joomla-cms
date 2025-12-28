@@ -196,14 +196,18 @@ class YstidesHelper
                 $category = $group['category'] ?? '';
                 $symbol   = $this->categorySymbol($category);
 
-                $start = HTMLHelper::_('date', $group['start'], 'Y-m-d H:i', 'UTC');
-                $end   = HTMLHelper::_('date', $group['end'], 'Y-m-d H:i', 'UTC');
+                $startFull = HTMLHelper::_('date', $group['start'], 'Y-m-d H:i', 'UTC');
+                $endFull   = HTMLHelper::_('date', $group['end'], 'Y-m-d H:i', 'UTC');
+
+                $startTime = HTMLHelper::_('date', $group['start'], 'H:i', 'UTC');
+                $endTime   = HTMLHelper::_('date', $group['end'], 'H:i', 'UTC');
 
                 return [
-                    'time'   => $start . ' - ' . $end,
-                    'wlm'    => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
-                    'symbol' => $symbol,
-                    'raw'    => $group,
+                    'time'    => $startTime . ' - ' . $endTime,
+                    'tooltip' => $startFull . ' - ' . $endFull,
+                    'wlm'     => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
+                    'symbol'  => $symbol,
+                    'raw'     => $group,
                 ];
             },
             $grouped

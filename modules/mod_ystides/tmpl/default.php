@@ -45,7 +45,6 @@ $rowsData       = $rows ?? [];
 			<tr>
 				<th scope="col"><?php echo Text::_('MOD_YSTIDES_HEADING_TIME'); ?></th>
 				<th scope="col"><?php echo Text::_('MOD_YSTIDES_HEADING_WLM'); ?></th>
-				<th scope="col"><?php echo Text::_('MOD_YSTIDES_HEADING_TIDE'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -56,9 +55,12 @@ $rowsData       = $rows ?? [];
 			<?php else : ?>
 				<?php foreach ($rowsData as $row) : ?>
 					<tr>
-						<td><?php echo htmlspecialchars($row['time'], ENT_QUOTES, 'UTF-8'); ?></td>
-						<td><?php echo htmlspecialchars($row['wlm'], ENT_QUOTES, 'UTF-8'); ?></td>
-						<td><?php echo htmlspecialchars($row['symbol'], ENT_QUOTES, 'UTF-8'); ?></td>
+						<td title="<?php echo htmlspecialchars($row['tooltip'], ENT_QUOTES, 'UTF-8'); ?>">
+							<?php echo htmlspecialchars($row['time'], ENT_QUOTES, 'UTF-8'); ?>
+						</td>
+						<td>
+							<?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?>
+						</td>
 					</tr>
 				<?php endforeach; ?>
 			<?php endif; ?>
