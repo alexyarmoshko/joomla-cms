@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="module" client="site" method="upgrade">
 	<name>mod_ystides</name>
-	<author>YSTides</author>
-	<creationDate>2025-02</creationDate>
-	<copyright>(C) 2025 YSTides</copyright>
+	<author>Yak Shaver Tides</author>
+	<creationDate>2025-12-28</creationDate>
+	<copyright>(C) 2025 Yak Shaver https://www.kayakshaver.com</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<authorEmail>admin@example.com</authorEmail>
-	<authorUrl>https://www.joomla.org</authorUrl>
+	<authorEmail>me@kayakshaver.com</authorEmail>
+	<authorUrl>https://www.kayakshaver.com</authorUrl>
 	<version>1.0.1</version>
 	<description>MOD_YSTIDES_XML_DESCRIPTION</description>
 	<namespace path="src">Joomla\Module\Ystides</namespace>
