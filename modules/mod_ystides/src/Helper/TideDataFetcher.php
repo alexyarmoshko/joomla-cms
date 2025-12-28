@@ -44,40 +44,38 @@ class TideDataFetcher
      */
     public function ensureRange(DatabaseInterface $db, string $stationId, Date $startDate, Date $endDate): void
     {
-        $missingDays = $this->findMissingDays($db, $stationId, $startDate, $endDate);
-
-        if (empty($missingDays)) {
+        if ($this->isRangeCached($db, $stationId, $startDate, $endDate)) {
             return;
         }
 
-        foreach ($missingDays as $day) {
-            $rows = $this->fetchDay($stationId, $day);
+        $rangeStart = $startDate->format('Y-m-d') . 'T00:00:00Z';
+        $rangeEnd   = $endDate->format('Y-m-d') . 'T23:59:59Z';
 
-            if (!empty($rows)) {
-                $this->storeRows($db, $rows);
-            }
+        $rows = $this->fetchRange($stationId, $startDate, $endDate);
+        $rows = $this->assignCategories($rows);
+        $rows = $this->filterToRange($rows, $rangeStart, $rangeEnd);
+
+        if (!empty($rows)) {
+            $this->storeRows($db, $rows);
         }
     }
 
     /**
-     * Determine which days in the range are missing any cached records.
+     * Check if range is already cached (start and end day present).
      *
      * @param   DatabaseInterface  $db         Database connection.
      * @param   string             $stationId  Station identifier.
-     * @param   Date               $startDate  Start date (UTC, inclusive).
-     * @param   Date               $endDate    End date (UTC, inclusive).
+     * @param   Date               $startDate  Start date.
+     * @param   Date               $endDate    End date.
      *
-     * @return  array<int, Date>
+     * @return  bool
      *
      * @since   1.0.1
      */
-    private function findMissingDays(DatabaseInterface $db, string $stationId, Date $startDate, Date $endDate): array
+    private function isRangeCached(DatabaseInterface $db, string $stationId, Date $startDate, Date $endDate): bool
     {
-        $missing = [];
-        $current = clone $startDate;
-
-        while ($current <= $endDate) {
-            $dayLabel = $current->format('Y-m-d');
+        $checkDay = function (Date $day) use ($db, $stationId) {
+            $dayLabel = $day->format('Y-m-d');
 
             $query = $db->getQuery(true)
                 ->select('1')
@@ -87,32 +85,31 @@ class TideDataFetcher
                 ->setLimit(1);
 
             $db->setQuery($query);
-            $hasRow = (bool) $db->loadResult();
 
-            if (!$hasRow) {
-                $missing[] = clone $current;
-            }
+            return (bool) $db->loadResult();
+        };
 
-            $current->modify('+1 day');
-        }
-
-        return $missing;
+        return $checkDay($startDate) && $checkDay($endDate);
     }
 
     /**
-     * Fetch a day's data from ERDDAP.
+     * Fetch the range (with padding) from ERDDAP and filter to requested window.
      *
      * @param   string  $stationId  Station identifier.
-     * @param   Date    $day        Day (UTC) to fetch.
+     * @param   Date    $startDate  Start date (UTC) inclusive.
+     * @param   Date    $endDate    End date (UTC) inclusive.
      *
      * @return  array<int,array<string,mixed>>
      *
      * @since   1.0.1
      */
-    private function fetchDay(string $stationId, Date $day): array
+    private function fetchRange(string $stationId, Date $startDate, Date $endDate): array
     {
-        $dayStart = $day->format('Y-m-d') . 'T00:00:00Z';
-        $dayEnd   = $day->format('Y-m-d') . 'T23:59:59Z';
+        $startPad = (clone $startDate)->modify('-1 day');
+        $endPad   = (clone $endDate)->modify('+1 day');
+
+        $dayStart = $startPad->format('Y-m-d') . 'T00:00:00Z';
+        $dayEnd   = $endPad->format('Y-m-d') . 'T23:59:59Z';
 
         $query = [
             'time',
@@ -123,22 +120,23 @@ class TideDataFetcher
             'Water_Level_ODM',
         ];
 
-        $queryString = self::BASE_URL . '?' . rawurlencode(sprintf(
-            '%s&stationID=%s&time>=%s&time<=%s&orderBy("time")',
-            implode(',', $query),
-            '"' . $stationId . '"',
-            $dayStart,
-            $dayEnd
-        ));
+        $columns      = implode(',', $query);
+        $stationParam = 'stationID=' . '"' . $stationId . '"';
+        $startParam   = 'time>=' . $dayStart;
+        $endParam     = 'time<=' . $dayEnd;
+        $orderParam   = 'orderBy("time")';
+
+        $queryString = self::BASE_URL . '?' . rawurlencode($columns . '&' . implode('&', [$stationParam, $startParam, $endParam, $orderParam]));
 
         $http     = HttpFactory::getHttp();
-
+        
+        # Logging the request URL
         Log::add(
                 Text::sprintf('MOD_YSTIDES_FETCHING', $queryString),
                 Log::INFO,
                 'mod_ystides'
-        );
-        
+            );
+
         $response = $http->get($queryString, ['Accept' => 'text/csv', 'Accept-Encoding' => 'gzip']);
 
         if ($response->code < 200 || $response->code >= 300) {
@@ -150,7 +148,9 @@ class TideDataFetcher
             throw new RuntimeException(Text::sprintf('MOD_YSTIDES_ERR_FETCH', $response->code));
         }
 
-        return $this->parseCsvBody($response->body, $stationId);
+        $rows = $this->parseCsvBody($response->body, $stationId);
+
+        return $rows;
     }
 
     /**
@@ -188,14 +188,74 @@ class TideDataFetcher
             }
 
             $rows[] = [
-                'StationID'      => $columns[1] ?: $stationId,
-                'DateTime'       => $columns[0],
-                'TideCategory'   => 'f', // Placeholder until categorisation step.
-                'TideCoefficient'=> null,
-                'WLM'            => is_numeric($columns[4]) ? (float) $columns[4] : null,
-                'WLODMM'         => is_numeric($columns[5]) ? (float) $columns[5] : null,
+                'StationID'       => $columns[1] ?: $stationId,
+                'DateTime'        => $columns[0],
+                'TideCategory'    => null,
+                'TideCoefficient' => null,
+                'WLM'             => is_numeric($columns[4]) ? (float) $columns[4] : null,
+                'WLODMM'          => is_numeric($columns[5]) ? (float) $columns[5] : null,
             ];
         }
+
+        return $rows;
+    }
+
+    /**
+     * Filter rows to the requested date range only.
+     *
+     * @param   array   $rows        Parsed rows.
+     * @param   string  $rangeStart  Range start datetime (Y-m-d H:i:sZ).
+     * @param   string  $rangeEnd    Range end datetime.
+     *
+     * @return  array
+     *
+     * @since   1.0.1
+     */
+    private function filterToRange(array $rows, string $rangeStart, string $rangeEnd): array
+    {
+        return array_values(array_filter($rows, static function ($row) use ($rangeStart, $rangeEnd) {
+            $dt = $row['DateTime'] ?? '';
+
+            return $dt !== '' && $dt >= $rangeStart && $dt <= $rangeEnd;
+        }));
+    }
+
+    /**
+     * Assign tide categories in memory before persisting.
+     *
+     * @param   array<int,array<string,mixed>>  $rows  Rows sorted by DateTime.
+     *
+     * @return  array<int,array<string,mixed>>
+     *
+     * @since   1.0.1
+     */
+    private function assignCategories(array $rows): array
+    {
+        usort($rows, static function ($a, $b) {
+            return strcmp($a['DateTime'] ?? '', $b['DateTime'] ?? '');
+        });
+
+        $previousCategory = '';
+        $previousValue    = null;
+
+        foreach ($rows as $index => &$row) {
+            $value = $row['WLM'];
+
+            if ($index === 0 || $previousValue === null || $value === null) {
+                $row['TideCategory'] = $previousCategory;
+            } elseif ($value < $previousValue) {
+                $row['TideCategory'] = 'e';
+            } elseif ($value > $previousValue) {
+                $row['TideCategory'] = 'f';
+            } else {
+                $row['TideCategory'] = $previousCategory;
+            }
+
+            $previousCategory = $row['TideCategory'];
+            $previousValue    = $value;
+        }
+
+        unset($row);
 
         return $rows;
     }

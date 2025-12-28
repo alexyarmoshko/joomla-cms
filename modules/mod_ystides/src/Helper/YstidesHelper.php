@@ -48,6 +48,14 @@ class YstidesHelper
     private TideDataFetcher $tideDataFetcher;
 
     /**
+     * Cached display rows.
+     *
+     * @var    array
+     * @since  1.0.1
+     */
+    private array $displayRows = [];
+
+    /**
      * Constructor.
      *
      * @param   mixed                 $config           Optional config (ignored when called from HelperFactory).
@@ -77,11 +85,11 @@ class YstidesHelper
      */
     public function getLayoutVariables(Registry $params): array
     {
-        $stationId   = (string) $params->get('station_id', '');
-        $daysRange   = max(1, (int) $params->get('days_range', 7)) - 1;
+        $stationId  = (string) $params->get('station_id', '');
+        $daysRange  = max(1, (int) $params->get('days_range', 7));
 
         $startDate = $this->getUtcStartOfDay();
-        $endDate   = (clone $startDate)->modify('+' . max(0, $daysRange) . ' days');
+        $endDate   = (clone $startDate)->modify('+' . max(0, $daysRange - 1) . ' days');
 
         $stationDisplay = $stationId ? StationCatalog::getStationLabel($stationId) : Text::_('MOD_YSTIDES_STATION_PLACEHOLDER');
 
@@ -103,6 +111,7 @@ class YstidesHelper
         if ($dbReady && $stationId !== '') {
             try {
                 $this->tideDataFetcher->ensureRange($dbInfo['driver'], $stationId, $startDate, $endDate);
+                $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate);
             } catch (Throwable $exception) {
                 $fetchError = Text::sprintf('MOD_YSTIDES_ERR_FETCH', $exception->getMessage());
                 Factory::getApplication()->enqueueMessage($fetchError, 'warning');
@@ -120,6 +129,7 @@ class YstidesHelper
             'dbPath'         => $dbPath,
             'dbError'        => $dbError,
             'fetchError'     => $fetchError,
+            'rows'           => $this->displayRows,
         ];
     }
 
@@ -149,5 +159,67 @@ class YstidesHelper
     private function formatDate(Date $date): string
     {
         return HTMLHelper::_('date', $date->toUnix(), Text::_('DATE_FORMAT_LC4'), 'UTC');
+    }
+
+    /**
+     * Load display rows from cache for the date range.
+     *
+     * @param   \Joomla\Database\DatabaseInterface  $db         Database connection.
+     * @param   string                              $stationId  Station identifier.
+     * @param   Date                                $startDate  Start date (UTC).
+     * @param   Date                                $endDate    End date (UTC).
+     *
+     * @return  array<int,array<string,mixed>>
+     *
+     * @since   1.0.1
+     */
+    private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate): array
+    {
+        $start = $startDate->format('Y-m-d 00:00:00');
+        $end   = $endDate->format('Y-m-d 23:59:59');
+
+        $query = $db->getQuery(true)
+            ->select([$db->quoteName('DateTime'), $db->quoteName('WLM'), $db->quoteName('TideCategory')])
+            ->from($db->quoteName('TideData'))
+            ->where($db->quoteName('StationID') . ' = ' . $db->quote($stationId))
+            ->where($db->quoteName('DateTime') . ' BETWEEN ' . $db->quote($start) . ' AND ' . $db->quote($end))
+            ->order($db->quoteName('DateTime') . ' ASC');
+
+        $db->setQuery($query);
+        $rows = $db->loadAssocList();
+
+        return array_map(
+            function ($row) {
+                $category = $row['TideCategory'] ?? '';
+                $symbol   = $this->categorySymbol($category);
+
+                return [
+                    'time'   => HTMLHelper::_('date', $row['DateTime'], 'H:i', 'UTC'),
+                    'wlm'    => $row['WLM'] !== null ? number_format((float) $row['WLM'], 2) : '',
+                    'symbol' => $symbol,
+                    'raw'    => $row,
+                ];
+            },
+            $rows
+        );
+    }
+
+    /**
+     * Get a display symbol for a category.
+     *
+     * @param   string  $category  Tide category.
+     *
+     * @return  string
+     *
+     * @since   1.0.1
+     */
+    private function categorySymbol(string $category): string
+    {
+        return match ($category) {
+            'h' => '▲',
+            'l' => '▼',
+            'e' => '↘',
+            default => '↗',
+        };
     }
 }

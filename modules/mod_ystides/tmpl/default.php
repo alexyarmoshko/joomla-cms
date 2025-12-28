@@ -18,6 +18,7 @@ $rangeStart     = $dateRangeStart ?? '';
 $rangeEnd       = $dateRangeEnd ?? '';
 $dbErrorMessage = $dbError ?? '';
 $fetchErrorMessage = $fetchError ?? '';
+$rowsData       = $rows ?? [];
 ?>
 <div class="mod-ystides<?php echo htmlspecialchars($moduleClassSfx, ENT_QUOTES, 'UTF-8'); ?>">
 	<?php if ($dbErrorMessage !== '') : ?>
@@ -48,9 +49,19 @@ $fetchErrorMessage = $fetchError ?? '';
 			</tr>
 		</thead>
 		<tbody>
-			<tr class="mod-ystides__empty">
-				<td colspan="3"><?php echo Text::_('MOD_YSTIDES_NO_DATA'); ?></td>
-			</tr>
+			<?php if (empty($rowsData)) : ?>
+				<tr class="mod-ystides__empty">
+					<td colspan="3"><?php echo Text::_('MOD_YSTIDES_NO_DATA'); ?></td>
+				</tr>
+			<?php else : ?>
+				<?php foreach ($rowsData as $row) : ?>
+					<tr>
+						<td><?php echo htmlspecialchars($row['time'], ENT_QUOTES, 'UTF-8'); ?></td>
+						<td><?php echo htmlspecialchars($row['wlm'], ENT_QUOTES, 'UTF-8'); ?></td>
+						<td><?php echo htmlspecialchars($row['symbol'], ENT_QUOTES, 'UTF-8'); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			<?php endif; ?>
 		</tbody>
 	</table>
 	<?php endif; ?>
