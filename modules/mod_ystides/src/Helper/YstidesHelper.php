@@ -187,22 +187,79 @@ class YstidesHelper
             ->order($db->quoteName('DateTime') . ' ASC');
 
         $db->setQuery($query);
-            $rows = $db->loadAssocList();
+        $rows = $db->loadAssocList();
+
+        $grouped = $this->groupByCategoryAndWlm($rows);
 
         return array_map(
-            function ($row) {
-                $category = $row['TideCategory'] ?? '';
+            function ($group) {
+                $category = $group['category'] ?? '';
                 $symbol   = $this->categorySymbol($category);
 
+                $start = HTMLHelper::_('date', $group['start'], 'Y-m-d H:i', 'UTC');
+                $end   = HTMLHelper::_('date', $group['end'], 'Y-m-d H:i', 'UTC');
+
                 return [
-                    'time'   => HTMLHelper::_('date', $row['DateTime'], Text::_('DATE_FORMAT_LC4') . ' H:i', 'UTC'),
-                    'wlm'    => $row['WLM'] !== null ? number_format((float) $row['WLM'], 2) : '',
+                    'time'   => $start . ' - ' . $end,
+                    'wlm'    => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
                     'symbol' => $symbol,
-                    'raw'    => $row,
+                    'raw'    => $group,
                 ];
             },
-            $rows
+            $grouped
         );
+    }
+
+    /**
+     * Group consecutive rows with same category and WLM into a single display item.
+     *
+     * @param   array  $rows  Rows from DB.
+     *
+     * @return  array<int,array<string,mixed>>
+     *
+     * @since   1.0.1
+     */
+    private function groupByCategoryAndWlm(array $rows): array
+    {
+        $grouped = [];
+        $current = null;
+
+        foreach ($rows as $row) {
+            $cat = $row['TideCategory'] ?? '';
+            $wlm = $row['WLM'];
+            $dt  = $row['DateTime'];
+
+            if ($current === null) {
+                $current = [
+                    'category' => $cat,
+                    'wlm'      => $wlm,
+                    'start'    => $dt,
+                    'end'      => $dt,
+                ];
+
+                continue;
+            }
+
+            $isSameGroup = ($current['category'] === $cat) && ($current['wlm'] === $wlm);
+
+            if ($isSameGroup) {
+                $current['end'] = $dt;
+            } else {
+                $grouped[] = $current;
+                $current   = [
+                    'category' => $cat,
+                    'wlm'      => $wlm,
+                    'start'    => $dt,
+                    'end'      => $dt,
+                ];
+            }
+        }
+
+        if ($current !== null) {
+            $grouped[] = $current;
+        }
+
+        return $grouped;
     }
 
     /**
