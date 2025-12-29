@@ -110,6 +110,11 @@ class YstidesHelper
 
         if ($dbReady && $stationId !== '') {
             try {
+                if ($stationId !== 'Dublin_Port') {
+                    // Always ensure that data for Dublin Port is available as it's needed for reference.
+                    $this->tideDataFetcher->ensureRange($dbInfo['driver'], 'Dublin_Port', $startDate, $endDate);
+                }
+                // Fetch data for the selected station.
                 $this->tideDataFetcher->ensureRange($dbInfo['driver'], $stationId, $startDate, $endDate);
                 $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate);
             } catch (Throwable $exception) {
