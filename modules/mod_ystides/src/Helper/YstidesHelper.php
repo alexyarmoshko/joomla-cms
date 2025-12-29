@@ -123,8 +123,8 @@ class YstidesHelper
             'stationId'      => $stationId,
             'stationName'    => $stationDisplay,
             'daysRange'      => $daysRange,
-            'dateRangeStart' => $this->formatDate($startDate),
-            'dateRangeEnd'   => $this->formatDate($endDate),
+            'dateRangeStart' => HTMLHelper::_('date', $startDate->toUnix(), Text::_('MOD_YSTIDES_DATE_FORMAT_LC7'), 'UTC'),
+            'dateRangeEnd'   => HTMLHelper::_('date', $endDate->toUnix(), Text::_('MOD_YSTIDES_DATE_FORMAT_LC7'), 'UTC'),
             'dbReady'        => $dbReady,
             'dbPath'         => $dbPath,
             'dbError'        => $dbError,
@@ -145,20 +145,6 @@ class YstidesHelper
         $now = Factory::getDate('now', 'UTC');
 
         return new Date($now->format('Y-m-d 00:00:00'), 'UTC');
-    }
-
-    /**
-     * Format a date using Joomla helpers in UTC.
-     *
-     * @param   Date  $date  Date to format.
-     *
-     * @return  string
-     *
-     * @since   1.0.0
-     */
-    private function formatDate(Date $date): string
-    {
-        return HTMLHelper::_('date', $date->toUnix(), Text::_('DATE_FORMAT_LC4'), 'UTC');
     }
 
     /**
@@ -197,15 +183,17 @@ class YstidesHelper
                 $category = $group['category'] ?? '';
                 $symbol   = $this->categorySymbol($category);
 
-                $startFull = HTMLHelper::_('date', $group['start'], 'Y-m-d H:i', 'UTC');
-                $endFull   = HTMLHelper::_('date', $group['end'], 'Y-m-d H:i', 'UTC');
-
                 $startTime = HTMLHelper::_('date', $group['start'], 'H:i', 'UTC');
                 $endTime   = HTMLHelper::_('date', $group['end'], 'H:i', 'UTC');
 
+                $startDate = HTMLHelper::_('date', $group['start'], 'd M', 'UTC');
+                $endDate   = HTMLHelper::_('date', $group['end'], 'd M', 'UTC');
+
                 return [
-                    'time'    => $startTime . ' - ' . $endTime,
-                    'tooltip' => $startFull . ' - ' . $endFull,
+                    'startd'  => $startDate,
+                    'endd'    => $endDate,
+                    'startt'  => $startTime,
+                    'endt'    => $endTime,
                     'wlm'     => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
                     'symbol'  => $symbol['symbol'],
                     'hint'    => $symbol['label'],

@@ -78,6 +78,7 @@
 					description="MOD_YSTIDES_FIELD_DAYS_RANGE_DESC"
 					default="7"
 					filter="integer"
+					validate="number"
 					min="1"
 					max="14"
 				/>

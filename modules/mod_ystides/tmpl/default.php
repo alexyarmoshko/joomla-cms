@@ -14,8 +14,6 @@ use Joomla\CMS\Language\Text;
 
 $moduleClassSfx = isset($moduleclass_sfx) ? $moduleclass_sfx : '';
 $stationHeader  = $stationName ?? '';
-$rangeStart     = $dateRangeStart ?? '';
-$rangeEnd       = $dateRangeEnd ?? '';
 $dbErrorMessage = $dbError ?? '';
 $fetchErrorMessage = $fetchError ?? '';
 $rowsData       = $rows ?? [];
@@ -38,12 +36,7 @@ $rowsData       = $rows ?? [];
 				</th>
 			</tr>
 			<tr>
-				<th colspan="3" class="mod-ystides-table-subheader">
-					<?php echo Text::sprintf('MOD_YSTIDES_DATE_RANGE', htmlspecialchars($rangeStart, ENT_QUOTES, 'UTF-8'), htmlspecialchars($rangeEnd, ENT_QUOTES, 'UTF-8')); ?>
-				</th>
-			</tr>
-			<tr>
-				<th scope="col" class="mod-ystides-table-subheader-col1"><?php echo Text::_('MOD_YSTIDES_HEADING_TIME'); ?></th>
+				<th colspan="2"  scope="col" class="mod-ystides-table-subheader-col1"><?php echo Text::_('MOD_YSTIDES_HEADING_TIME'); ?></th>
 				<th scope="col" class="mod-ystides-table-subheader-col2"><?php echo Text::_('MOD_YSTIDES_HEADING_WLM'); ?></th>
 			</tr>
 		</thead>
@@ -55,8 +48,15 @@ $rowsData       = $rows ?? [];
 			<?php else : ?>
 				<?php foreach ($rowsData as $row) : ?>
 					<tr>
-						<td class="mod-ystides-table-data-col1" title="<?php echo htmlspecialchars($row['tooltip'], ENT_QUOTES, 'UTF-8'); ?>">
-							<?php echo htmlspecialchars($row['time'], ENT_QUOTES, 'UTF-8'); ?>
+						<td class="mod-ystides-table-data-col1">
+							<?php echo htmlspecialchars($row['startd'], ENT_QUOTES, 'UTF-8'); ?> 
+							<?php if ($row['startd'] !== $row['endd']) : ?>
+							  <br> <?php echo htmlspecialchars($row['endd'], ENT_QUOTES, 'UTF-8'); ?>
+							<?php endif; ?>
+						</td>
+						<td class="mod-ystides-table-data-col1">
+							<?php echo htmlspecialchars($row['startt'], ENT_QUOTES, 'UTF-8'); ?> <br>
+							<?php echo htmlspecialchars($row['endt'], ENT_QUOTES, 'UTF-8'); ?>
 						</td>
 						<td class="mod-ystides-table-data-col2" title="<?php echo htmlspecialchars($row['hint'], ENT_QUOTES, 'UTF-8'); ?>">
 							<?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?>
