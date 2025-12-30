@@ -194,6 +194,7 @@ class TideDataFetcher
                 'TideCoefficient' => null,
                 'WLM'             => is_numeric($columns[4]) ? (float) $columns[4] : null,
                 'WLODMM'          => is_numeric($columns[5]) ? (float) $columns[5] : null,
+                'TideRange'       => null,
             ];
         }
 
@@ -309,13 +310,14 @@ class TideDataFetcher
         try {
             foreach ($rows as $row) {
                 $sql = sprintf(
-                    'INSERT OR IGNORE INTO TideData (StationID, DateTime, TideCategory, TideCoefficient, WLM, WLODMM) VALUES (%s, %s, %s, %s, %s, %s)',
+                    'INSERT OR IGNORE INTO TideData (StationID, DateTime, TideCategory, TideCoefficient, WLM, WLODMM, TideRange) VALUES (%s, %s, %s, %s, %s, %s, %s)',
                     $db->quote($row['StationID']),
                     $db->quote($row['DateTime']),
                     $db->quote($row['TideCategory']),
                     $row['TideCoefficient'] === null ? 'NULL' : (int) $row['TideCoefficient'],
                     $row['WLM'] === null ? 'NULL' : $db->quote($row['WLM']),
-                    $row['WLODMM'] === null ? 'NULL' : $db->quote($row['WLODMM'])
+                    $row['WLODMM'] === null ? 'NULL' : $db->quote($row['WLODMM']),
+                    $row['TideRange'] === null ? 'NULL' : $db->quote($row['TideRange'])
                 );
 
                 $db->setQuery($sql);
