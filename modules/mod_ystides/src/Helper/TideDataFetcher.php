@@ -57,6 +57,7 @@ class TideDataFetcher
 
         if (!empty($rows)) {
             $this->storeRows($db, $rows);
+            $this->postProcessRanges($db, $stationId);
         }
     }
 
@@ -81,7 +82,7 @@ class TideDataFetcher
                 ->select('1')
                 ->from($db->quoteName('TideData'))
                 ->where($db->quoteName('StationID') . ' = ' . $db->quote($stationId))
-                ->where('substr(' . $db->quoteName('DateTime') . ',1,10) = ' . $db->quote($dayLabel))
+                ->where('substr(' . $db->quoteName('TideDT') . ',1,10) = ' . $db->quote($dayLabel))
                 ->setLimit(1);
 
             $db->setQuery($query);
@@ -189,7 +190,7 @@ class TideDataFetcher
 
             $rows[] = [
                 'StationID'       => $columns[1] ?: $stationId,
-                'DateTime'        => $columns[0],
+                'TideDT'          => $columns[0],
                 'TideCategory'    => null,
                 'TideCoefficient' => null,
                 'WLM'             => is_numeric($columns[4]) ? (float) $columns[4] : null,
@@ -215,7 +216,7 @@ class TideDataFetcher
     private function filterToRange(array $rows, string $rangeStart, string $rangeEnd): array
     {
         return array_values(array_filter($rows, static function ($row) use ($rangeStart, $rangeEnd) {
-            $dt = $row['DateTime'] ?? '';
+            $dt = $row['TideDT'] ?? '';
 
             return $dt !== '' && $dt >= $rangeStart && $dt <= $rangeEnd;
         }));
@@ -224,7 +225,7 @@ class TideDataFetcher
     /**
      * Assign tide categories in memory before persisting.
      *
-     * @param   array<int,array<string,mixed>>  $rows  Rows sorted by DateTime.
+     * @param   array<int,array<string,mixed>>  $rows  Rows sorted by TideDT.
      *
      * @return  array<int,array<string,mixed>>
      *
@@ -233,7 +234,7 @@ class TideDataFetcher
     private function assignCategories(array $rows): array
     {
         usort($rows, static function ($a, $b) {
-            return strcmp($a['DateTime'] ?? '', $b['DateTime'] ?? '');
+            return strcmp($a['TideDT'] ?? '', $b['TideDT'] ?? '');
         });
 
         $previousCategory = '';
@@ -260,11 +261,11 @@ class TideDataFetcher
 
         // Reverse pass to assign highs (h) and lows (l) at trend changes.
         $first_item_idx = count($rows) - 1;
-        $last_item_idx = 1;
+        $last_item_idx  = 1;
 
         for ($i = $first_item_idx; $i > $last_item_idx; $i--) {
             $currCat = ($rows[$i]['TideCategory'] ?? '') . ($rows[$i - 1]['TideCategory'] ?? '');
-            $newCat = '';
+            $newCat  = '';
 
             switch ($currCat) {
                 case 'ef':
@@ -278,7 +279,7 @@ class TideDataFetcher
             }
 
             if ($newCat !== '') {
-                $wlmTarget = $rows[$i-1]['WLM'];
+                $wlmTarget = $rows[$i - 1]['WLM'];
 
                 for ($j = $i - 1; $j >= 0; $j--) {
                     if ($rows[$j]['WLM'] === $wlmTarget) {
@@ -310,9 +311,9 @@ class TideDataFetcher
         try {
             foreach ($rows as $row) {
                 $sql = sprintf(
-                    'INSERT OR IGNORE INTO TideData (StationID, DateTime, TideCategory, TideCoefficient, WLM, WLODMM, TideRange) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                    'INSERT OR IGNORE INTO TideData (StationID, TideDT, TideCategory, TideCoefficient, WLM, WLODMM, TideRange) VALUES (%s, %s, %s, %s, %s, %s, %s)',
                     $db->quote($row['StationID']),
-                    $db->quote($row['DateTime']),
+                    $db->quote($row['TideDT']),
                     $db->quote($row['TideCategory']),
                     $row['TideCoefficient'] === null ? 'NULL' : (int) $row['TideCoefficient'],
                     $row['WLM'] === null ? 'NULL' : $db->quote($row['WLM']),
@@ -329,6 +330,79 @@ class TideDataFetcher
             $db->transactionRollback();
 
             throw $exception;
+        }
+    }
+
+    /**
+     * Post-process tide ranges using neighbouring extremes once data is stored.
+     *
+     * @param   DatabaseInterface  $db         Database connection.
+     * @param   string             $stationId  Station identifier.
+     *
+     * @return  void
+     *
+     * @since   1.0.1
+     */
+    private function postProcessRanges(DatabaseInterface $db, string $stationId): void
+    {
+        $quotedStation = $db->quote($stationId);
+
+        $updateHigh = "
+UPDATE TideData AS TD
+   SET TideRange = round(abs(WLM - (
+       SELECT WLM
+         FROM TideData
+        WHERE StationID = TD.StationID
+          AND TideDT > TD.TideDT
+          AND TideCategory IN ('l')
+          AND WLM <> TD.WLM
+        ORDER BY TideDT ASC
+        LIMIT 1
+   )), 2)
+ WHERE TideCategory IN ('h', 'e')
+   AND TideRange IS NULL;";
+
+        $updateLow = "
+UPDATE TideData AS TD
+   SET TideRange = round(abs(WLM - (
+       SELECT WLM
+         FROM TideData
+        WHERE StationID = TD.StationID
+          AND TideDT > TD.TideDT
+          AND TideCategory IN ('h')
+          AND WLM <> TD.WLM
+        ORDER BY TideDT ASC
+        LIMIT 1
+   )), 2)
+ WHERE TideCategory IN ('l', 'f')
+   AND TideRange IS NULL;";
+
+# 3.4m is the mean tidal range at Dublin Port, this is reference value to calculate 
+# the tide coefficient for Irish coastal stations.
+
+        $updateDublinPortRefCoeff = "
+UPDATE TideData
+    SET TideCoefficient =  round((TideRange * 100)/3.4, 0)
+WHERE TideCategory in ('h', 'l') AND 
+    TideRange IS NOT NULL AND 
+    StationID='Dublin_Port';";
+
+        $updateOtherStationsCoeff = "
+UPDATE TideData AS TD
+  SET TideCoefficient = 
+            (SELECT TD1.TideCoefficient 
+			FROM TideData TD1
+			WHERE TD1.StationID='Dublin_Port' AND 
+		          datetime(TD1.TideDT, 'utc') BETWEEN datetime(TD.TideDT, '-1 hours', 'utc') AND datetime(TD.TideDT, '+1 hours', 'utc')  AND 
+				  TD1.TideCategory = TD.TideCategory LIMIT 1)
+WHERE TD.TideCategory in ('h', 'l') AND 
+      TD.StationID <> 'Dublin_Port' AND 
+	  TD.TideRange IS NOT NULL AND 
+	  TD.TideCoefficient IS NULL;";
+
+        foreach ([$updateHigh, $updateLow, $updateDublinPortRefCoeff, $updateOtherStationsCoeff] as $sql) {
+            $db->setQuery($sql);
+            $db->execute();
         }
     }
 }

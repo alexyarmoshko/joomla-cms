@@ -23,12 +23,12 @@ Primary key: StationID
 Table name: TideData
 
 StationID, TEXT -- Station ID
-DateTime, TEXT -- Tide data point date and time in UTC
+TideDT, TEXT -- Tide data point date and time in UTC
 TideCategory, TEXT -- Tide data point category: [l|h|f|e]. "l" for low water, "h" for hight water, "f" for flooding, "e" for ebbing
 TideCoefficient, INTEGER -- Tidal coefficient
 WLM, REAL -- Tide data point water level in meters
 WLODMM, REAL -- Tide data point water level OD Malin
-Primary key: StationID, DateTime
+Primary key: StationID, TideDT
 Foreign key: StationID -> TideStations.StationID
 
 - **Testing & checks**: If you touch PHP logic, add/adjust tests where they exist (PHPUnit/system). Run available linters/tests locally when practical; keep changes minimal if tests aren’t present.

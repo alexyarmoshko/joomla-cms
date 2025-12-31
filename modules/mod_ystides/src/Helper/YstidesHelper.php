@@ -113,8 +113,8 @@ class YstidesHelper
                 // Always ensure that data for Dublin Port is available as it's needed for reference.
                 $this->tideDataFetcher->ensureRange($dbInfo['driver'], 'Dublin_Port', (clone $startDate)->modify('-2 days'), (clone $startDate)->modify('+14 days'));
                 
-                // Fetch data for the selected station.
-                $this->tideDataFetcher->ensureRange($dbInfo['driver'], $stationId, $startDate, $endDate);
+                // Fetch data for the selected station +- 1 day to ensure proper tide range calculation.
+                $this->tideDataFetcher->ensureRange($dbInfo['driver'], $stationId, (clone $startDate)->modify('-1 days'), (clone $endDate)->modify('+1 days'));
                 $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate);
             } catch (Throwable $exception) {
                 $fetchError = Text::sprintf('MOD_YSTIDES_ERR_FETCH', $exception->getMessage());
@@ -170,12 +170,12 @@ class YstidesHelper
         $end   = $endDate->format('Y-m-d') . 'T23:59:59Z';
 
         $query = $db->getQuery(true)
-            ->select([$db->quoteName('DateTime'), $db->quoteName('WLM'), $db->quoteName('TideCategory')])
+            ->select([$db->quoteName('TideDT'), $db->quoteName('WLM'), $db->quoteName('TideCategory')])
             ->from($db->quoteName('TideData'))
             ->where($db->quoteName('StationID') . ' = ' . $db->quote($stationId))
-            ->where($db->quoteName('DateTime') . ' BETWEEN ' . $db->quote($start) . ' AND ' . $db->quote($end))
+            ->where($db->quoteName('TideDT') . ' BETWEEN ' . $db->quote($start) . ' AND ' . $db->quote($end))
             ->where($db->quoteName('TideCategory') . ' IN (' . $db->quote('h') . ',' . $db->quote('l') . ')')
-            ->order($db->quoteName('DateTime') . ' ASC');
+            ->order($db->quoteName('TideDT') . ' ASC');
 
         $db->setQuery($query);
         $rows = $db->loadAssocList();
@@ -225,7 +225,7 @@ class YstidesHelper
         foreach ($rows as $row) {
             $cat = $row['TideCategory'] ?? '';
             $wlm = $row['WLM'];
-            $dt  = $row['DateTime'];
+            $dt  = $row['TideDT'];
 
             if ($current === null) {
                 $current = [

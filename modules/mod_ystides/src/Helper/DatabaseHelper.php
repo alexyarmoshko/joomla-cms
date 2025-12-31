@@ -158,18 +158,18 @@ SQL;
         $dataSql = <<<SQL
 CREATE TABLE IF NOT EXISTS TideData (
     StationID TEXT NOT NULL,
-    DateTime TEXT NOT NULL,
+    TideDT TEXT NOT NULL,
     TideCategory TEXT NOT NULL,
     TideCoefficient INTEGER DEFAULT NULL,
     WLM REAL,
     WLODMM REAL,
     TideRange REAL DEFAULT NULL,
-    PRIMARY KEY (StationID, DateTime),
+    PRIMARY KEY (StationID, TideDT),
     FOREIGN KEY (StationID) REFERENCES TideStations(StationID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 SQL;
 
-        $indexSql = 'CREATE INDEX IF NOT EXISTS idx_tidedata_station_date ON TideData (StationID, DateTime);';
+        $indexSql = 'CREATE INDEX IF NOT EXISTS idx_tidedata_station_date ON TideData (StationID, TideDT);';
 
         foreach ([$stationSql, $dataSql, $indexSql] as $sql) {
             $db->setQuery($sql);
