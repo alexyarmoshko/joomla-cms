@@ -23,6 +23,8 @@ $rowsData       = $rows ?? [];
 $moduleId       = isset($module) ? (int) $module->id : rand(1000, 9999);
 $mainId         = 'ystides-main-' . $moduleId;
 $infoId         = 'ystides-info-' . $moduleId;
+$progressMin    = 20;
+$progressMax    = 120;
 ?>
 <div class="mod-ystides<?php echo htmlspecialchars($moduleClassSfx, ENT_QUOTES, 'UTF-8'); ?>">
 	<?php if ($dbErrorMessage !== '') : ?>
@@ -62,6 +64,27 @@ $infoId         = 'ystides-info-' . $moduleId;
 					</tr>
 				<?php else : ?>
 					<?php foreach ($rowsData as $row) : ?>
+						<?php
+						$coefValue   = $row['coef'];
+						$coefPercent = null;
+						$coefLabel   = '';
+						$coefColor   = '';
+
+						if ($coefValue !== null) {
+							$coefPercent = max(0, min(100, ($coefValue - $progressMin) * 100 / ($progressMax - $progressMin)));
+							$coefLabel   = Text::sprintf('MOD_YSTIDES_TIDE_COEFFICIENT_VALUE', (int) $coefValue);
+
+							if ($coefValue < 50) {
+								$coefColor = '#198754';
+							} elseif ($coefValue < 70) {
+								$coefColor = '#ffc107';
+							} elseif ($coefValue < 90) {
+								$coefColor = '#fd7e14';
+							} else {
+								$coefColor = '#dc3545';
+							}
+						}
+						?>
 						<tr>
 							<td class="mod-ystides-table-data-col1">
 								<?php echo htmlspecialchars($row['startd'], ENT_QUOTES, 'UTF-8'); ?>
@@ -73,8 +96,25 @@ $infoId         = 'ystides-info-' . $moduleId;
 								<?php echo htmlspecialchars($row['startt'], ENT_QUOTES, 'UTF-8'); ?> <br>
 								<?php echo htmlspecialchars($row['endt'], ENT_QUOTES, 'UTF-8'); ?>
 							</td>
-							<td class="mod-ystides-table-data-col2">
-								<?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?>
+							<td class="mod-ystides-table-data-col2" title="<?php echo htmlspecialchars($row['hint'], ENT_QUOTES, 'UTF-8'); ?>">
+								<div class="position-relative overflow-hidden">
+									<?php if ($coefPercent !== null) : ?>
+										<div class="progress flex-row-reverse position-absolute start-0 top-0 w-100 h-100 opacity-25" style="pointer-events: none;">
+											<div class="progress-bar" role="progressbar"
+												style="width: <?php echo $coefPercent; ?>%; background-color: <?php echo htmlspecialchars($coefColor, ENT_QUOTES, 'UTF-8'); ?>; text-align: right;"
+												aria-valuenow="<?php echo (int) $coefValue; ?>"
+												aria-valuemin="<?php echo $progressMin; ?>"
+												aria-valuemax="<?php echo $progressMax; ?>">
+											</div>
+										</div>
+									<?php endif; ?>
+									<div class="d-flex align-items-center justify-content-between gap-2 position-relative">
+										<span><?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?></span>
+										<?php if ($coefPercent !== null) : ?>
+											<span class="badge" style="color: <?php echo htmlspecialchars($coefColor, ENT_QUOTES, 'UTF-8'); ?>;" title="<?php echo htmlspecialchars($coefLabel, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars((int) $coefValue, ENT_QUOTES, 'UTF-8'); ?></span>
+										<?php endif; ?>
+									</div>
+								</div>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -96,8 +136,8 @@ $infoId         = 'ystides-info-' . $moduleId;
 			<div class="fw-semibold"><?php echo Text::_('MOD_YSTIDES_INFO'); ?></div>
 		</div>
 		<div class="card">
-			<div class="card-body">
-				<?php echo htmlspecialchars(Text::_('MOD_YSTIDES_INFO_TEXT'), ENT_QUOTES, 'UTF-8'); ?>
+			<div class="card-body mod-ystides-info">
+				<p style="text-align: left;"><?php echo htmlspecialchars(Text::_('MOD_YSTIDES_INFO_TEXT'), ENT_QUOTES, 'UTF-8'); ?></p>
 			</div>
 		</div>
 	</div>

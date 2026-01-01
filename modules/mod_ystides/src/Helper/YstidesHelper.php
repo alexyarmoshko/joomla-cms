@@ -166,11 +166,17 @@ class YstidesHelper
     private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate): array
     {
         // Stored datetimes use ISO format with "T" and "Z" (e.g. 2025-12-28T12:30:00Z)
-        $start = $startDate->format('Y-m-d') . 'T00:00:00Z';
+        // Start date/time is six hours before to capture the last high/low at the previous day.
+        $start = (clone $startDate)->modify('-1 days')->format('Y-m-d') . 'T17:00:00Z';
         $end   = $endDate->format('Y-m-d') . 'T23:59:59Z';
 
         $query = $db->getQuery(true)
-            ->select([$db->quoteName('TideDT'), $db->quoteName('WLM'), $db->quoteName('TideCategory')])
+            ->select([
+                $db->quoteName('TideDT'),
+                $db->quoteName('WLM'),
+                $db->quoteName('TideCategory'),
+                $db->quoteName('TideCoefficient'),
+            ])
             ->from($db->quoteName('TideData'))
             ->where($db->quoteName('StationID') . ' = ' . $db->quote($stationId))
             ->where($db->quoteName('TideDT') . ' BETWEEN ' . $db->quote($start) . ' AND ' . $db->quote($end))
@@ -187,6 +193,11 @@ class YstidesHelper
                 $category = $group['category'] ?? '';
                 $symbol   = $this->categorySymbol($category);
 
+                $progress = null;
+                if (isset($group['coef']) && is_numeric($group['coef'])) {
+                    $progress = (int) $group['coef'];
+                }
+
                 $startTime = HTMLHelper::_('date', $group['start'], 'H:i', 'UTC');
                 $endTime   = HTMLHelper::_('date', $group['end'], 'H:i', 'UTC');
 
@@ -201,6 +212,7 @@ class YstidesHelper
                     'wlm'     => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
                     'symbol'  => $symbol['symbol'],
                     'hint'    => $symbol['label'],
+                    'coef'    => $progress,
                     'raw'     => $group,
                 ];
             },
@@ -226,6 +238,7 @@ class YstidesHelper
             $cat = $row['TideCategory'] ?? '';
             $wlm = $row['WLM'];
             $dt  = $row['TideDT'];
+            $coef = $row['TideCoefficient'] ?? null;
 
             if ($current === null) {
                 $current = [
@@ -233,6 +246,7 @@ class YstidesHelper
                     'wlm'      => $wlm,
                     'start'    => $dt,
                     'end'      => $dt,
+                    'coef'     => $coef,
                 ];
 
                 continue;
@@ -249,6 +263,7 @@ class YstidesHelper
                     'wlm'      => $wlm,
                     'start'    => $dt,
                     'end'      => $dt,
+                    'coef'     => $coef,
                 ];
             }
         }
