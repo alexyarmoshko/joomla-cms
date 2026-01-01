@@ -15,6 +15,10 @@ use Joomla\CMS\Language\Text;
 
 HTMLHelper::_('bootstrap.collapse');
 
+/** @var Joomla\CMS\WebAsset\WebAssetManager $wa */
+$wa = $app->getDocument()->getWebAssetManager();
+$wa->registerAndUseStyle('mod_ystides', 'mod_ystides/template.css');
+
 $moduleClassSfx = isset($moduleclass_sfx) ? $moduleclass_sfx : '';
 $stationHeader  = $stationName ?? '';
 $dbErrorMessage = $dbError ?? '';
@@ -71,17 +75,17 @@ $progressMax    = 120;
 						$coefColor   = '';
 
 						if ($coefValue !== null) {
-							$coefPercent = max(0, min(100, ($coefValue - $progressMin) * 100 / ($progressMax - $progressMin)));
+							$coefPercent = max(0, min(100, $coefValue - 20));
 							$coefLabel   = Text::sprintf('MOD_YSTIDES_TIDE_COEFFICIENT_VALUE', (int) $coefValue);
 
 							if ($coefValue < 50) {
-								$coefColor = '#198754';
+								$coefColor = 'low';
 							} elseif ($coefValue < 70) {
-								$coefColor = '#ffc107';
+								$coefColor = 'average';
 							} elseif ($coefValue < 90) {
-								$coefColor = '#fd7e14';
+								$coefColor = 'high';
 							} else {
-								$coefColor = '#dc3545';
+								$coefColor = 'very-high';
 							}
 						}
 						?>
@@ -100,18 +104,18 @@ $progressMax    = 120;
 								<div class="position-relative overflow-hidden">
 									<?php if ($coefPercent !== null) : ?>
 										<div class="progress flex-row-reverse position-absolute start-0 top-0 w-100 h-100 opacity-25" style="pointer-events: none;">
-											<div class="progress-bar" role="progressbar"
-												style="width: <?php echo $coefPercent; ?>%; background-color: <?php echo htmlspecialchars($coefColor, ENT_QUOTES, 'UTF-8'); ?>; text-align: right;"
+											<div class="progress-bar ystides-coeff-<?php echo $coefColor; ?>" role="progressbar"
+												style="width: <?php echo $coefPercent; ?>%"
 												aria-valuenow="<?php echo (int) $coefValue; ?>"
-												aria-valuemin="<?php echo $progressMin; ?>"
-												aria-valuemax="<?php echo $progressMax; ?>">
+												aria-valuemin="20"
+												aria-valuemax="120">
 											</div>
 										</div>
 									<?php endif; ?>
 									<div class="d-flex align-items-center justify-content-between gap-2 position-relative">
 										<span><?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?></span>
 										<?php if ($coefPercent !== null) : ?>
-											<span class="badge" style="color: <?php echo htmlspecialchars($coefColor, ENT_QUOTES, 'UTF-8'); ?>;" title="<?php echo htmlspecialchars($coefLabel, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars((int) $coefValue, ENT_QUOTES, 'UTF-8'); ?></span>
+											<span class="badge ystides-coeff-value-<?php echo $coefColor; ?>" title="<?php echo htmlspecialchars($coefLabel, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars((int) $coefValue, ENT_QUOTES, 'UTF-8'); ?></span>
 										<?php endif; ?>
 									</div>
 								</div>
