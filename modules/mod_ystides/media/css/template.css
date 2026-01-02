@@ -1,0 +1,56 @@
+@charset "UTF-8";
+.mod-ystides-table {
+  line-height: normal;
+  font-size: 14px;
+}
+
+div.mod-ystides-info {
+  background-image: url('/media/mod_ystides/images/ystides_logo.svg'); 
+  background-repeat: no-repeat; 
+  background-position: top center; 
+  background-size: contain; 
+  min-height: 150px; 
+  position: relative; 
+  background-color: rgba(255,255,255,0.90);
+  background-blend-mode: lighten;
+}
+
+div.mod-ystides-info div.card {
+  background-color: transparent;
+}
+
+div.progress-bar {
+  text-align: right;
+}
+
+div.progress-bar.ystides-coeff-low {
+  background-color: #198754;
+}
+
+div.progress-bar.ystides-coeff-average {
+  background-color: #ffc107;
+}
+
+div.progress-bar.ystides-coeff-high {
+  background-color: #fd7e14;
+}
+
+div.progress-bar.ystides-coeff-very-high {
+  background-color: #dc3545;
+}
+
+span.ystides-coeff-value-low {
+  color: #198754;
+}
+
+span.ystides-coeff-value-average {
+  color: #ffc107;
+}
+
+span.ystides-coeff-value-high {
+  color: #fd7e14;
+}
+
+span.ystides-coeff-value-very-high {
+  color: #dc3545;
+}

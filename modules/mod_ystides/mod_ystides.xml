@@ -19,6 +19,10 @@
 		<language tag="en-GB">language/en-GB/mod_ystides.ini</language>
 		<language tag="en-GB">language/en-GB/mod_ystides.sys.ini</language>
 	</languages>
+	<media folder="media" destination="mod_ystides">
+		<folder>css</folder>
+		<folder>images</folder>
+	</media>
 	<config>
 		<fields name="params">
 			<fieldset name="basic" label="COM_MODULES_BASIC_FIELDSET_LABEL">
