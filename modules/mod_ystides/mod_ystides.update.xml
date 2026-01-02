@@ -7,7 +7,7 @@
         <version>1.0.1</version>
         <client>site</client>
         <downloads>
-            <downloadurl type="full" format="zip">https://test.ecskc.eu/updates/mod_ystides-v1-0-1.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/alexyarmoshko/joomla_mod_ystides/releases/download/1.0.1-rc1/mod_ystides-v1-0-1.zip</downloadurl>
         </downloads>
         <tags>
             <tag>stable</tag>

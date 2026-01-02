@@ -136,6 +136,6 @@
 		</fields>
 	</config>
 	<updateservers>
-		<server type="extension" name="Yak Shaver Tides Updates">https://test.ecskc.eu/updates/mod_ystides.update.xml</server>
+		<server type="extension" name="Yak Shaver Tides Updates">https://raw.githubusercontent.com/alexyarmoshko/joomla_mod_ystides/refs/heads/main/mod_ystides.update.xml</server>
 	</updateservers>
 </extension>
