@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="module" client="site" method="upgrade">
-	<name>mod_ystides</name>
-	<author>Yak Shaver Tides</author>
+	<name>Yak Shaver Tides</name>
+	<author>Yak Shaver</author>
 	<creationDate>2025-12-28</creationDate>
 	<copyright>(C) 2025 Yak Shaver https://www.kayakshaver.com</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
@@ -135,4 +135,7 @@
 			</fieldset>
 		</fields>
 	</config>
+	<updateservers>
+		<server type="extension" name="Yak Shaver Tides Updates">https://test.ecskc.eu/updates/mod_ystides.update.xml</server>
+	</updateservers>
 </extension>
