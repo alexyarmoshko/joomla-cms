@@ -127,7 +127,7 @@ $progressMax    = 120;
 		</table>
 	</div>
 
-	<div class="mod-ystides__wrap collapse multi-collapse" id="<?php echo $infoId; ?>" data-bs-parent=".mod-ystides">
+	<div class="mod-ystides__wrap collapse multi-collapse mod-ystides-info" id="<?php echo $infoId; ?>" data-bs-parent=".mod-ystides">
 		<div class="d-flex align-items-center justify-content-between mb-2">
 			<button
 				type="button"
@@ -140,8 +140,9 @@ $progressMax    = 120;
 			<div class="fw-semibold"><?php echo Text::_('MOD_YSTIDES_INFO'); ?></div>
 		</div>
 		<div class="card">
-			<div class="card-body mod-ystides-info">
-				<p style="text-align: left;"><?php echo htmlspecialchars(Text::_('MOD_YSTIDES_INFO_TEXT'), ENT_QUOTES, 'UTF-8'); ?></p>
+			<div class="card-body" style="padding-top: 5ex;">
+				<p style="text-align: left;"><?php echo Text::_('MOD_YSTIDES_INFO_ERDAAP'); ?></p>
+				<p style="text-align: left;"><?php echo Text::_('MOD_YSTIDES_INFO_TIDE_COEEFFICIENT1'); ?> <?php echo Text::_('MOD_YSTIDES_INFO_TIDE_COEEFFICIENT2'); ?></p>
 			</div>
 		</div>
 	</div>
