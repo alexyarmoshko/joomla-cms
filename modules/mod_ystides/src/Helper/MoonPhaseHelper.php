@@ -111,7 +111,14 @@ class MoonPhaseHelper
      */
     public function fetchYearFromApi(int $year): ?array
     {
-        $url = self::API_URL . '?year=' . $year;
+        /*
+        If you plan to write your own form or script to access the APIs, 
+        we encourage you to use the ID parameter in your API call. 
+        Using this parameter is optional. However, the use of user IDs 
+        allows us to keep track of how many unique users we have, and 
+        helps us justify our work on the web.
+        */
+        $url = self::API_URL . '?ID=YSTideIE' . '&year=' . $year;
 
         try {
             $http = HttpFactory::getHttp();
