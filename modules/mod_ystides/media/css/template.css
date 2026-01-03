@@ -1,6 +1,6 @@
 @charset "UTF-8";
 .mod-ystides-table {
-  line-height: normal;
+  line-height: 1.5;
   font-size: 14px;
 }
 
@@ -53,4 +53,22 @@ span.ystides-coeff-value-high {
 
 span.ystides-coeff-value-very-high {
   color: #dc3545;
+}
+
+div.ystides-hw-tide-icon {
+  background-image: url('/media/mod_ystides/images/hw-tide-cl.svg'); 
+  background-repeat: no-repeat; 
+  background-position: top left; 
+  background-size: contain; 
+  position: relative; 
+  padding-left:3ex;
+}
+
+div.ystides-lw-tide-icon {
+  background-image: url('/media/mod_ystides/images/lw-tide-cl.svg'); 
+  background-repeat: no-repeat; 
+  background-position: top left; 
+  background-size: contain; 
+  position: relative;
+  padding-left:3ex;
 }

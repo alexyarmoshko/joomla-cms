@@ -67,6 +67,7 @@ $progressMax    = 120;
 						<td colspan="3"><?php echo Text::_('MOD_YSTIDES_NO_DATA'); ?></td>
 					</tr>
 				<?php else : ?>
+					<?php $prevMeanD = null; ?>
 					<?php foreach ($rowsData as $row) : ?>
 						<?php
 						$coefValue   = $row['coef'];
@@ -90,15 +91,13 @@ $progressMax    = 120;
 						}
 						?>
 						<tr>
-							<td class="mod-ystides-table-data-col1">
-								<?php echo htmlspecialchars($row['startd'], ENT_QUOTES, 'UTF-8'); ?>
-								<?php if ($row['startd'] !== $row['endd']) : ?>
-								  <br> <?php echo htmlspecialchars($row['endd'], ENT_QUOTES, 'UTF-8'); ?>
+							<td class="mod-ystides-table-data-col1" title="<?php echo htmlspecialchars($row['titledt'], ENT_QUOTES, 'UTF-8'); ?>">
+								<?php if ($prevMeanD !== $row['meand']) : ?>
+									<?php echo HTMLHelper::_('date', $row['meandt'], 'j M', 'UTC'); ?> 
 								<?php endif; ?>
 							</td>
-							<td class="mod-ystides-table-data-col1">
-								<?php echo htmlspecialchars($row['startt'], ENT_QUOTES, 'UTF-8'); ?> <br>
-								<?php echo htmlspecialchars($row['endt'], ENT_QUOTES, 'UTF-8'); ?>
+							<td class="mod-ystides-table-data-col1" title="<?php echo htmlspecialchars($row['titledt'], ENT_QUOTES, 'UTF-8'); ?>">
+								<?php echo HTMLHelper::_('date', $row['meandt'], 'H:i', 'UTC'); ?> (&plusmn;<?php echo $row['deltadt']; ?>)
 							</td>
 							<td class="mod-ystides-table-data-col2" title="<?php echo htmlspecialchars($row['hint'], ENT_QUOTES, 'UTF-8'); ?>">
 								<div class="position-relative overflow-hidden">
@@ -112,8 +111,8 @@ $progressMax    = 120;
 											</div>
 										</div>
 									<?php endif; ?>
-									<div class="d-flex align-items-center justify-content-between gap-2 position-relative">
-										<span><?php echo htmlspecialchars($row['symbol'] . ' ' . $row['wlm'], ENT_QUOTES, 'UTF-8'); ?></span>
+									<div class="d-flex align-items-center justify-content-between gap-2 position-relative ystides-<?php echo $row['symbol'] ?>-tide-icon">
+										<span><?php echo $row['wlm']; ?></span>
 										<?php if ($coefPercent !== null) : ?>
 											<span class="badge ystides-coeff-value-<?php echo $coefColor; ?>" title="<?php echo htmlspecialchars($coefLabel, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars((int) $coefValue, ENT_QUOTES, 'UTF-8'); ?></span>
 										<?php endif; ?>
@@ -121,6 +120,7 @@ $progressMax    = 120;
 								</div>
 							</td>
 						</tr>
+						<?php $prevMeanD = $row['meand']; ?>
 					<?php endforeach; ?>
 				<?php endif; ?>
 			</tbody>

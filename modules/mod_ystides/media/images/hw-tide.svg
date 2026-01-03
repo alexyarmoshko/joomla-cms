@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="High Tide">
+    <!-- wavy water line (top) with one more peak -->
+    <path d="M4 12
+             C8 6, 12 6, 16 12
+             C20 18, 24 18, 28 12
+             C32 6, 36 6, 40 12
+             C44 18, 48 18, 52 12
+             C56 6, 60 6, 64 12"
+          fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- arrow up (centered) -->
+    <path d="M32 54V24" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M22 32l10-10 10 10" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

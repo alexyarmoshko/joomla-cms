@@ -127,8 +127,6 @@ class YstidesHelper
             'stationId'      => $stationId,
             'stationName'    => $stationDisplay,
             'daysRange'      => $daysRange,
-            'dateRangeStart' => HTMLHelper::_('date', $startDate->toUnix(), Text::_('MOD_YSTIDES_DATE_FORMAT_LC7'), 'UTC'),
-            'dateRangeEnd'   => HTMLHelper::_('date', $endDate->toUnix(), Text::_('MOD_YSTIDES_DATE_FORMAT_LC7'), 'UTC'),
             'dbReady'        => $dbReady,
             'dbPath'         => $dbPath,
             'dbError'        => $dbError,
@@ -192,27 +190,23 @@ class YstidesHelper
             function ($group) {
                 $category = $group['category'] ?? '';
                 $symbol   = $this->categorySymbol($category);
-
-                $progress = null;
-                if (isset($group['coef']) && is_numeric($group['coef'])) {
-                    $progress = (int) $group['coef'];
-                }
-
-                $startTime = HTMLHelper::_('date', $group['start'], 'H:i', 'UTC');
-                $endTime   = HTMLHelper::_('date', $group['end'], 'H:i', 'UTC');
-
-                $startDate = HTMLHelper::_('date', $group['start'], 'd M', 'UTC');
-                $endDate   = HTMLHelper::_('date', $group['end'], 'd M', 'UTC');
+                $coef = (isset($group['coef']) && is_numeric($group['coef'])) ? (int) $group['coef'] : null;
+                $startDT = $group['start'];
+                $endDT   = $group['end'];
+                $deltaDT = round(((new Date($endDT, 'UTC'))->toUnix() - (new Date($startDT, 'UTC'))->toUnix())/120, 0);
+                $meanDT  = (new Date($startDT, 'UTC'))->toUnix() + (($deltaDT * 120) / 2);
 
                 return [
-                    'startd'  => $startDate,
-                    'endd'    => $endDate,
-                    'startt'  => $startTime,
-                    'endt'    => $endTime,
+                    'titledt' => HTMLHelper::_('date', $startDT, 'DATE_FORMAT_LC5', 'UTC') . ' - ' . HTMLHelper::_('date', $endDT, 'DATE_FORMAT_LC5', 'UTC'),
+                    'startdt' => $startDT,
+                    'enddt'   => $endDT,
+                    'deltadt' => $deltaDT,
+                    'meand'   => HTMLHelper::_('date', $meanDT, 'DATE_FORMAT_LC4', 'UTC'),
+                    'meandt'  => $meanDT,
                     'wlm'     => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
                     'symbol'  => $symbol['symbol'],
                     'hint'    => $symbol['label'],
-                    'coef'    => $progress,
+                    'coef'    => $coef,
                     'raw'     => $group,
                 ];
             },
@@ -287,8 +281,8 @@ class YstidesHelper
     private function categorySymbol(string $category): array
     {
         return match ($category) {
-            'h' => ['symbol' => '▲', 'label' => Text::_('MOD_YSTIDES_HIGH_WATER')],
-            'l' => ['symbol' => '▼', 'label' => Text::_('MOD_YSTIDES_LOW_WATER')],
+            'h' => ['symbol' => 'hw', 'label' => Text::_('MOD_YSTIDES_HIGH_WATER')],
+            'l' => ['symbol' => 'lw', 'label' => Text::_('MOD_YSTIDES_LOW_WATER')],
             'e' => ['symbol' => '↘', 'label' => ''],
             'f' => ['symbol' => '↗', 'label' => ''],
             default => ['symbol' => '?', 'label' => ''],

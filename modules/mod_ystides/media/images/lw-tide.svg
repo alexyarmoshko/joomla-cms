@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Low Tide">
+    <!-- arrow down (centered) -->
+    <path d="M32 10v30" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M22 32l10 10 10-10" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- wavy water line (bottom) with one more peak -->
+    <path d="M4 52
+             C8 46, 12 46, 16 52
+             C20 58, 24 58, 28 52
+             C32 46, 36 46, 40 52
+             C44 58, 48 58, 52 52
+             C56 46, 60 46, 64 52"
+          fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -382,7 +382,7 @@ UPDATE TideData AS TD
 
         $updateDublinPortRefCoeff = "
 UPDATE TideData
-    SET TideCoefficient =  round((TideRange * 100)/3.4, 0)
+    SET TideCoefficient =  round((TideRange * 100)/3.5, 0)
 WHERE TideCategory in ('h', 'l') AND 
     TideRange IS NOT NULL AND 
     StationID='Dublin_Port';";
