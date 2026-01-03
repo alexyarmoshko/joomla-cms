@@ -12,7 +12,6 @@ StationName, TEXT -- Station Name
 StationID, TEXT -- Unique Station ID
 LonDegE, TEXT -- Longitude Degrees East
 LatDegN, TEXT -- Latitude Degrees North 
-MTR, REAL -- Mean Tidal Range
 RefStationID, TEXT -- Reference (Main Port) Station ID, empty for Main Ports
 RefStationHWTimeOffset, TEXT -- High Water Time offset from Main Port
 RefStationLWTimeOffset, TEXT -- Low Water Time offset from Main Port

@@ -146,7 +146,6 @@ CREATE TABLE IF NOT EXISTS TideStations (
     StationName TEXT,
     LonDegE TEXT,
     LatDegN TEXT,
-    MTR REAL DEFAULT NULL,
     RefStationID TEXT DEFAULT NULL,
     RefStationHWTimeOffset TEXT DEFAULT NULL,
     RefStationLWTimeOffset TEXT DEFAULT NULL,
@@ -203,7 +202,7 @@ SQL;
      * Seed or update station metadata from an array.
      *
      * @param   DatabaseInterface  $db        Database connection.
-     * @param   array              $stations  Array of associative arrays with keys: StationID, StationName, LonDegE, LatDegN, MTR, RefStationID, RefStationHWTimeOffset, RefStationLWTimeOffset, RefStationHWLOffset, RefStationLWLOffset.
+     * @param   array              $stations  Array of associative arrays with keys: StationID, StationName, LonDegE, LatDegN, RefStationID, RefStationHWTimeOffset, RefStationLWTimeOffset, RefStationHWLOffset, RefStationLWLOffset.
      *
      * @return  void
      *
@@ -221,7 +220,6 @@ INSERT INTO TideStations (
     StationName,
     LonDegE,
     LatDegN,
-    MTR,
     RefStationID,
     RefStationHWTimeOffset,
     RefStationLWTimeOffset,
@@ -232,7 +230,6 @@ ON CONFLICT(StationID) DO UPDATE SET
     StationName = excluded.StationName,
     LonDegE = excluded.LonDegE,
     LatDegN = excluded.LatDegN,
-    MTR = excluded.MTR,
     RefStationID = excluded.RefStationID,
     RefStationHWTimeOffset = excluded.RefStationHWTimeOffset,
     RefStationLWTimeOffset = excluded.RefStationLWTimeOffset,
@@ -246,7 +243,6 @@ SQL;
                 $this->quoteNullable($db, $station['StationName'] ?? null),
                 $this->quoteNullable($db, $station['LonDegE'] ?? null),
                 $this->quoteNullable($db, $station['LatDegN'] ?? null),
-                $this->quoteNullable($db, $station['MTR'] ?? null),
                 $this->quoteNullable($db, $station['RefStationID'] ?? null),
                 $this->quoteNullable($db, $station['RefStationHWTimeOffset'] ?? null),
                 $this->quoteNullable($db, $station['RefStationLWTimeOffset'] ?? null),
