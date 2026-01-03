@@ -1,22 +1,28 @@
 @charset "UTF-8";
+
 .mod-ystides-table {
   line-height: 1.5;
   font-size: 14px;
 }
 
 div.mod-ystides-info {
-  background-image: url('/media/mod_ystides/images/ystides_logo.svg'); 
-  background-repeat: no-repeat; 
-  background-position: top center; 
-  background-size: contain; 
-  min-height: 150px; 
-  position: relative; 
-  background-color: rgba(255,255,255,0.90);
+  background-image: url('/media/mod_ystides/images/ystides_logo.svg');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: contain;
+  min-height: 150px;
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.90);
   background-blend-mode: lighten;
 }
 
 div.mod-ystides-info div.card {
   background-color: transparent;
+  height: 50ex;
+}
+
+div.mod-ystides-info div.card div.card-body {
+  padding-top: 5ex;
 }
 
 div.progress-bar {
@@ -56,19 +62,44 @@ span.ystides-coeff-value-very-high {
 }
 
 div.ystides-hw-tide-icon {
-  background-image: url('/media/mod_ystides/images/hw-tide-cl.svg'); 
-  background-repeat: no-repeat; 
-  background-position: top left; 
-  background-size: contain; 
-  position: relative; 
-  padding-left:3ex;
+  background-image: url('/media/mod_ystides/images/hw-tide-cl.svg');
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-size: contain;
+  position: relative;
+  padding-left: 3ex;
 }
 
 div.ystides-lw-tide-icon {
-  background-image: url('/media/mod_ystides/images/lw-tide-cl.svg'); 
-  background-repeat: no-repeat; 
-  background-position: top left; 
-  background-size: contain; 
+  background-image: url('/media/mod_ystides/images/lw-tide-cl.svg');
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-size: contain;
   position: relative;
-  padding-left:3ex;
+  padding-left: 3ex;
+}
+
+div.ystides-moon {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  position: relative;
+  display: inline-block;
+  width: 16px;
+}
+
+div.ystides-moon-new-icon {
+  background-image: url('/media/mod_ystides/images/moon-new-details.svg');
+}
+
+div.ystides-moon-1q-icon {
+  background-image: url('/media/mod_ystides/images/moon-1q-details.svg');
+}
+
+div.ystides-moon-full-icon {
+  background-image: url('/media/mod_ystides/images/moon-full-details.svg');
+}
+
+div.ystides-moon-2q-icon {
+  background-image: url('/media/mod_ystides/images/moon-2q-details.svg');
 }

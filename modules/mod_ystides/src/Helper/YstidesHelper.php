@@ -16,6 +16,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\Registry\Registry;
+use Joomla\Module\Ystides\Site\Helper\MoonPhaseHelper;
 use Joomla\Module\Ystides\Site\Helper\StationCatalog;
 use Joomla\Module\Ystides\Site\Helper\TideDataFetcher;
 use Throwable;
@@ -48,6 +49,14 @@ class YstidesHelper
     private TideDataFetcher $tideDataFetcher;
 
     /**
+     * Moon phase helper.
+     *
+     * @var    MoonPhaseHelper
+     * @since  1.0.2
+     */
+    private MoonPhaseHelper $moonPhaseHelper;
+
+    /**
      * Cached display rows.
      *
      * @var    array
@@ -61,17 +70,23 @@ class YstidesHelper
      * @param   mixed                 $config           Optional config (ignored when called from HelperFactory).
      * @param   DatabaseHelper|null   $databaseHelper   Optional database helper for testing/overrides.
      * @param   TideDataFetcher|null  $tideDataFetcher  Optional fetcher helper for testing/overrides.
+     * @param   MoonPhaseHelper|null  $moonPhaseHelper  Optional moon phase helper for testing/overrides.
      *
      * @since   1.0.1
      */
-    public function __construct($config = null, ?DatabaseHelper $databaseHelper = null, ?TideDataFetcher $tideDataFetcher = null)
-    {
+    public function __construct(
+        $config = null,
+        ?DatabaseHelper $databaseHelper = null,
+        ?TideDataFetcher $tideDataFetcher = null,
+        ?MoonPhaseHelper $moonPhaseHelper = null
+    ) {
         if ($config instanceof DatabaseHelper && $databaseHelper === null) {
             $databaseHelper = $config;
         }
 
         $this->databaseHelper = $databaseHelper ?? new DatabaseHelper();
         $this->tideDataFetcher = $tideDataFetcher ?? new TideDataFetcher();
+        $this->moonPhaseHelper = $moonPhaseHelper ?? new MoonPhaseHelper();
     }
 
     /**
@@ -85,22 +100,22 @@ class YstidesHelper
      */
     public function getLayoutVariables(Registry $params): array
     {
-        $stationId  = (string) $params->get('station_id', '');
-        $daysRange  = max(1, (int) $params->get('days_range', 7));
+        $stationId = (string) $params->get('station_id', '');
+        $daysRange = max(1, (int) $params->get('days_range', 7));
 
         $startDate = $this->getUtcStartOfDay();
-        $endDate   = (clone $startDate)->modify('+' . max(0, $daysRange - 1) . ' days');
+        $endDate = (clone $startDate)->modify('+' . max(0, $daysRange - 1) . ' days');
 
         $stationDisplay = $stationId ? StationCatalog::getStationLabel($stationId) : Text::_('MOD_YSTIDES_STATION_PLACEHOLDER');
 
-        $dbReady   = false;
-        $dbError   = '';
-        $dbPath    = '';
+        $dbReady = false;
+        $dbError = '';
+        $dbPath = '';
         $fetchError = '';
 
         try {
-            $dbInfo  = $this->databaseHelper->prepareDatabase($params);
-            $dbPath  = $dbInfo['path'];
+            $dbInfo = $this->databaseHelper->prepareDatabase($params);
+            $dbPath = $dbInfo['path'];
             $dbReady = true;
         } catch (Throwable $exception) {
             $dbError = Text::sprintf('MOD_YSTIDES_ERR_DB_INIT', $exception->getMessage());
@@ -112,10 +127,24 @@ class YstidesHelper
             try {
                 // Always ensure that data for Dublin Port is available as it's needed for reference.
                 $this->tideDataFetcher->ensureRange($dbInfo['driver'], 'Dublin_Port', (clone $startDate)->modify('-2 days'), (clone $startDate)->modify('+14 days'));
-                
+
                 // Fetch data for the selected station +- 1 day to ensure proper tide range calculation.
                 $this->tideDataFetcher->ensureRange($dbInfo['driver'], $stationId, (clone $startDate)->modify('-1 days'), (clone $endDate)->modify('+1 days'));
-                $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate);
+
+                // Ensure moon phases are cached for the date range years.
+                $startYear = (int) $startDate->format('Y');
+                $endYear = (int) $endDate->format('Y');
+                $years = ($startYear === $endYear) ? [$startYear] : [$startYear, $endYear];
+                $this->moonPhaseHelper->ensurePhasesForYears($dbInfo['driver'], $years);
+
+                // Get moon phases for display range.
+                $moonPhases = $this->moonPhaseHelper->getPhasesForRange(
+                    $dbInfo['driver'],
+                    $startDate->format('Y-m-d'),
+                    $endDate->format('Y-m-d')
+                );
+
+                $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate, $moonPhases);
             } catch (Throwable $exception) {
                 $fetchError = Text::sprintf('MOD_YSTIDES_ERR_FETCH', $exception->getMessage());
                 Factory::getApplication()->enqueueMessage($fetchError, 'warning');
@@ -124,14 +153,14 @@ class YstidesHelper
         }
 
         return [
-            'stationId'      => $stationId,
-            'stationName'    => $stationDisplay,
-            'daysRange'      => $daysRange,
-            'dbReady'        => $dbReady,
-            'dbPath'         => $dbPath,
-            'dbError'        => $dbError,
-            'fetchError'     => $fetchError,
-            'rows'           => $this->displayRows,
+            'stationId' => $stationId,
+            'stationName' => $stationDisplay,
+            'daysRange' => $daysRange,
+            'dbReady' => $dbReady,
+            'dbPath' => $dbPath,
+            'dbError' => $dbError,
+            'fetchError' => $fetchError,
+            'rows' => $this->displayRows,
         ];
     }
 
@@ -152,21 +181,22 @@ class YstidesHelper
     /**
      * Load display rows from cache for the date range.
      *
-     * @param   \Joomla\Database\DatabaseInterface  $db         Database connection.
-     * @param   string                              $stationId  Station identifier.
-     * @param   Date                                $startDate  Start date (UTC).
-     * @param   Date                                $endDate    End date (UTC).
+     * @param   \Joomla\Database\DatabaseInterface  $db          Database connection.
+     * @param   string                              $stationId   Station identifier.
+     * @param   Date                                $startDate   Start date (UTC).
+     * @param   Date                                $endDate     End date (UTC).
+     * @param   array<string, string>               $moonPhases  Moon phases keyed by date.
      *
      * @return  array<int,array<string,mixed>>
      *
      * @since   1.0.1
      */
-    private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate): array
+    private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate, array $moonPhases = []): array
     {
         // Stored datetimes use ISO format with "T" and "Z" (e.g. 2025-12-28T12:30:00Z)
         // Start date/time is six hours before to capture the last high/low at the previous day.
         $start = (clone $startDate)->modify('-1 days')->format('Y-m-d') . 'T17:00:00Z';
-        $end   = $endDate->format('Y-m-d') . 'T23:59:59Z';
+        $end = $endDate->format('Y-m-d') . 'T23:59:59Z';
 
         $query = $db->getQuery(true)
             ->select([
@@ -185,29 +215,35 @@ class YstidesHelper
         $rows = $db->loadAssocList();
 
         $grouped = $this->groupByCategoryAndWlm($rows);
+        $moonPhaseHelper = $this->moonPhaseHelper;
 
         return array_map(
-            function ($group) {
+            function ($group) use ($moonPhases, $moonPhaseHelper) {
                 $category = $group['category'] ?? '';
-                $symbol   = $this->categorySymbol($category);
+                $symbol = $this->categorySymbol($category);
                 $coef = (isset($group['coef']) && is_numeric($group['coef'])) ? (int) $group['coef'] : null;
                 $startDT = $group['start'];
-                $endDT   = $group['end'];
-                $deltaDT = round(((new Date($endDT, 'UTC'))->toUnix() - (new Date($startDT, 'UTC'))->toUnix())/120, 0);
-                $meanDT  = (new Date($startDT, 'UTC'))->toUnix() + (($deltaDT * 120) / 2);
+                $endDT = $group['end'];
+                $deltaDT = round(((new Date($endDT, 'UTC'))->toUnix() - (new Date($startDT, 'UTC'))->toUnix()) / 120, 0);
+                $meanDT = (new Date($startDT, 'UTC'))->toUnix() + (($deltaDT * 120) / 2);
+                $dateKey = HTMLHelper::_('date', $meanDT, 'Y-m-d', 'UTC');
+
+                // Check for moon phase on this date.
+                $moonPhase = $moonPhases[$dateKey] ?? null;
 
                 return [
                     'titledt' => HTMLHelper::_('date', $startDT, 'DATE_FORMAT_LC5', 'UTC') . ' - ' . HTMLHelper::_('date', $endDT, 'DATE_FORMAT_LC5', 'UTC'),
                     'startdt' => $startDT,
-                    'enddt'   => $endDT,
+                    'enddt' => $endDT,
                     'deltadt' => $deltaDT,
-                    'meand'   => HTMLHelper::_('date', $meanDT, 'DATE_FORMAT_LC4', 'UTC'),
-                    'meandt'  => $meanDT,
-                    'wlm'     => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
-                    'symbol'  => $symbol['symbol'],
-                    'hint'    => $symbol['label'],
-                    'coef'    => $coef,
-                    'raw'     => $group,
+                    'meand' => HTMLHelper::_('date', $meanDT, 'DATE_FORMAT_LC4', 'UTC'),
+                    'meandt' => $meanDT,
+                    'wlm' => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
+                    'symbol' => $symbol['symbol'],
+                    'hint' => $symbol['label'],
+                    'coef' => $coef,
+                    'moonPhase' => $moonPhase,
+                    'raw' => $group,
                 ];
             },
             $grouped
@@ -231,16 +267,16 @@ class YstidesHelper
         foreach ($rows as $row) {
             $cat = $row['TideCategory'] ?? '';
             $wlm = $row['WLM'];
-            $dt  = $row['TideDT'];
+            $dt = $row['TideDT'];
             $coef = $row['TideCoefficient'] ?? null;
 
             if ($current === null) {
                 $current = [
                     'category' => $cat,
-                    'wlm'      => $wlm,
-                    'start'    => $dt,
-                    'end'      => $dt,
-                    'coef'     => $coef,
+                    'wlm' => $wlm,
+                    'start' => $dt,
+                    'end' => $dt,
+                    'coef' => $coef,
                 ];
 
                 continue;
@@ -252,12 +288,12 @@ class YstidesHelper
                 $current['end'] = $dt;
             } else {
                 $grouped[] = $current;
-                $current   = [
+                $current = [
                     'category' => $cat,
-                    'wlm'      => $wlm,
-                    'start'    => $dt,
-                    'end'      => $dt,
-                    'coef'     => $coef,
+                    'wlm' => $wlm,
+                    'start' => $dt,
+                    'end' => $dt,
+                    'coef' => $coef,
                 ];
             }
         }

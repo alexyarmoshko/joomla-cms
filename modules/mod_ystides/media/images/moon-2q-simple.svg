@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Last Quarter Moon">
+    <defs>
+        <clipPath id="leftHalf">
+            <rect x="0" y="0" width="32" height="64"/>
+        </clipPath>
+    </defs>
+    
+    <!-- dark base -->
+    <circle cx="32" cy="32" r="28" fill="#000"/>
+    <!-- lit half -->
+    <circle cx="32" cy="32" r="28" fill="#fff" clip-path="url(#leftHalf)"/>
+    <!-- outline -->
+    <circle cx="32" cy="32" r="28" fill="none" stroke="#000" stroke-width="4"/>
+</svg>

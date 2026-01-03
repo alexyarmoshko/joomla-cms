@@ -13,7 +13,7 @@ namespace Joomla\Module\Ystides\Site\Helper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
-use Joomla\CMS\Filesystem\Path;
+use Joomla\Filesystem\Path;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\Database\DatabaseDriver;
@@ -54,9 +54,9 @@ class DatabaseHelper
         $this->ensureDatabaseFile($fullPath);
 
         $options = [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => $fullPath,
-            'prefix'   => '',
+            'prefix' => '',
         ];
 
         $db = DatabaseDriver::getInstance($options);
@@ -67,7 +67,7 @@ class DatabaseHelper
 
         return [
             'driver' => $db,
-            'path'   => $fullPath,
+            'path' => $fullPath,
         ];
     }
 
@@ -86,7 +86,7 @@ class DatabaseHelper
             $tmpPath = JPATH_ROOT . '/tmp';
         }
 
-        $dir  = Path::clean($tmpPath . '/ystides');
+        $dir = Path::clean($tmpPath . '/ystides');
         $file = Path::clean($dir . '/ystides.sqlite');
 
         return $file;
@@ -170,7 +170,14 @@ SQL;
 
         $indexSql = 'CREATE INDEX IF NOT EXISTS idx_tidedata_station_date ON TideData (StationID, TideDT);';
 
-        foreach ([$stationSql, $dataSql, $indexSql] as $sql) {
+        $moonPhasesSql = <<<SQL
+CREATE TABLE IF NOT EXISTS TideMoonPhases (
+    PhaseDT TEXT NOT NULL PRIMARY KEY,
+    Phase TEXT NOT NULL
+);
+SQL;
+
+        foreach ([$stationSql, $dataSql, $indexSql, $moonPhasesSql] as $sql) {
             $db->setQuery($sql);
             $db->execute();
         }

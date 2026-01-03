@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Last Quarter Moon">
+    <defs>
+        <clipPath id="moonClip">
+            <circle cx="32" cy="32" r="28"/>
+        </clipPath>
+        <clipPath id="leftHalf">
+            <rect x="0" y="0" width="32" height="64"/>
+        </clipPath>
+    </defs>
+    
+    <!-- dark base -->
+    <circle cx="32" cy="32" r="28" fill="#000"/>
+    <!-- lit half -->
+    <circle cx="32" cy="32" r="28" fill="#fff" clip-path="url(#leftHalf)"/>
+    
+    <!-- features on lit side only -->
+    <g clip-path="url(#moonClip)" opacity="0.18">
+        <!-- mares -->
+        <ellipse cx="20" cy="28" rx="10" ry="7" fill="#d7d7d7" clip-path="url(#leftHalf)"/>
+        <ellipse cx="18" cy="42" rx="9" ry="6" fill="#d0d0d0" clip-path="url(#leftHalf)"/>
+        <!-- crater rings -->
+        <g fill="none" stroke="#bdbdbd" stroke-width="2" clip-path="url(#leftHalf)">
+            <circle cx="24" cy="36" r="4.5"/>
+            <circle cx="12" cy="24" r="3.5"/>
+            <circle cx="10" cy="44" r="2.8"/>
+            <circle cx="18" cy="18" r="2.5"/>
+        </g>
+    </g>
+    
+    <!-- outline -->
+    <circle cx="32" cy="32" r="28" fill="none" stroke="#000" stroke-width="4"/>
+</svg>
