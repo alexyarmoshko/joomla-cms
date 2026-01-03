@@ -225,7 +225,7 @@ INSERT INTO TideStations (
     RefStationLWTimeOffset,
     RefStationHWLOffset,
     RefStationLWLOffset
-) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT(StationID) DO UPDATE SET
     StationName = excluded.StationName,
     LonDegE = excluded.LonDegE,
