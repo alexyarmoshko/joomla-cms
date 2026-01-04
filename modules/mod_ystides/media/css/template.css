@@ -2,19 +2,11 @@
 
 .mod-ystides-table {
   line-height: normal;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .mod-ystides-table-data-col2 {
-  font-size: 12px;
-}
-
-.mod-ystides-table-data-col3 {
   font-size: 16px;
-}
-
-.mod-ystides-table-data-col4 {
-  font-size: 12px;
 }
 
 div.mod-ystides-info {
@@ -37,81 +29,31 @@ div.mod-ystides-info div.card div.card-body {
   padding-top: 5ex;
 }
 
-div.progress-bar {
-  text-align: right;
-}
-
-div.progress-bar.ystides-coeff-low {
+div.ystides-coeff-value-low {
   background-color: #198754;
-}
-
-div.progress-bar.ystides-coeff-average {
-  background-color: #ffc107;
-}
-
-div.progress-bar.ystides-coeff-high {
-  background-color: #fd7e14;
-}
-
-div.progress-bar.ystides-coeff-very-high {
-  background-color: #dc3545;
-}
-
-span.ystides-coeff-value-low {
   color: #198754;
+  float: right;
+  width: 5ex;
 }
 
-span.ystides-coeff-value-average {
+div.ystides-coeff-value-average {
+  background-color: #ffc107;
   color: #ffc107;
+  float: right;
+  width: 5ex;
 }
 
-span.ystides-coeff-value-high {
+div.ystides-coeff-value-high {
+  background-color: #fd7e14cc;
+  background-blend-mode: lighten;
   color: #fd7e14;
+  float: right;
+  width: 5ex;
 }
 
-span.ystides-coeff-value-very-high {
+div.ystides-coeff-value-very-high {
+  background-color: #dc354535;
   color: #dc3545;
-}
-
-div.ystides-hw-tide-icon {
-  background-image: url('/media/mod_ystides/images/hw-tide-cl.svg');
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-size: contain;
-  position: relative;
-  padding-left: 3ex;
-}
-
-div.ystides-lw-tide-icon {
-  background-image: url('/media/mod_ystides/images/lw-tide-cl.svg');
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-size: contain;
-  position: relative;
-  padding-left: 3ex;
-}
-
-div.ystides-moon {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  position: relative;
-  display: inline-block;
-  width: 16px;
-}
-
-div.ystides-moon-new-icon {
-  background-image: url('/media/mod_ystides/images/moon-new-details.svg');
-}
-
-div.ystides-moon-1q-icon {
-  background-image: url('/media/mod_ystides/images/moon-1q-details.svg');
-}
-
-div.ystides-moon-full-icon {
-  background-image: url('/media/mod_ystides/images/moon-full-details.svg');
-}
-
-div.ystides-moon-2q-icon {
-  background-image: url('/media/mod_ystides/images/moon-2q-details.svg');
+  float: right;
+  width: 5ex;
 }

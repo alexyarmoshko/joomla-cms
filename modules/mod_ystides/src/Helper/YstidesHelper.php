@@ -220,12 +220,12 @@ class YstidesHelper
         return array_map(
             function ($group) use ($moonPhases, $moonPhaseHelper) {
                 $category = $group['category'] ?? '';
-                $symbol = $this->categorySymbol($category);
                 $coef = (isset($group['coef']) && is_numeric($group['coef'])) ? (int) $group['coef'] : null;
                 $startDT = $group['start'];
                 $endDT = $group['end'];
-                $deltaDT = round(((new Date($endDT, 'UTC'))->toUnix() - (new Date($startDT, 'UTC'))->toUnix()) / 120, 0);
-                $meanDT = (new Date($startDT, 'UTC'))->toUnix() + (($deltaDT * 120) / 2);
+                $startTS = (new Date($startDT, 'UTC'))->toUnix();
+                $endTS = (new Date($endDT, 'UTC'))->toUnix();
+                $meanDT = round(($startTS + $endTS) / 2, 0);
                 $dateKey = HTMLHelper::_('date', $meanDT, 'Y-m-d', 'UTC');
 
                 // Check for moon phase on this date.
@@ -235,12 +235,10 @@ class YstidesHelper
                     'titledt' => HTMLHelper::_('date', $startDT, 'DATE_FORMAT_LC5', 'UTC') . ' - ' . HTMLHelper::_('date', $endDT, 'DATE_FORMAT_LC5', 'UTC'),
                     'startdt' => $startDT,
                     'enddt' => $endDT,
-                    'deltadt' => $deltaDT,
                     'meand' => HTMLHelper::_('date', $meanDT, 'DATE_FORMAT_LC4', 'UTC'),
                     'meandt' => $meanDT,
                     'wlm' => $group['wlm'] !== null ? number_format((float) $group['wlm'], 2) : '',
-                    'symbol' => $symbol['symbol'],
-                    'hint' => $symbol['label'],
+                    'tidehint' => $this->categorySymbol($category)['label'],
                     'coef' => $coef,
                     'moonPhase' => $moonPhase,
                     'raw' => $group,
@@ -319,8 +317,8 @@ class YstidesHelper
         return match ($category) {
             'h' => ['symbol' => 'hw', 'label' => Text::_('MOD_YSTIDES_HIGH_WATER')],
             'l' => ['symbol' => 'lw', 'label' => Text::_('MOD_YSTIDES_LOW_WATER')],
-            'e' => ['symbol' => '↘', 'label' => ''],
-            'f' => ['symbol' => '↗', 'label' => ''],
+            'e' => ['symbol' => 'e', 'label' => Text::_('MOD_YSTIDES_EBBING')],
+            'f' => ['symbol' => 'f', 'label' => Text::_('MOD_YSTIDES_FLOODING')],
             default => ['symbol' => '?', 'label' => ''],
         };
     }
