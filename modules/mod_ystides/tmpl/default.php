@@ -110,7 +110,8 @@ $progressMax = 120;
 								</td>
 								<td class="mod-ystides-table-data-col3"
 									title="<?php echo htmlspecialchars($row['titledt'], ENT_QUOTES, 'UTF-8'); ?>">
-									<?php echo str_replace(' ', '&nbsp;', HTMLHelper::_('date', $row['meandt'], 'H:i', 'UTC')); ?>&nbsp;(&plusmn;<?php echo $row['deltadt']; ?>)
+									<?php echo str_replace(' ', '&nbsp;', HTMLHelper::_('date', $row['meandt'], 'H:i', 'UTC')); ?>&nbsp;<span
+										style="font-size: smaller;">(&plusmn;<?php echo $row['deltadt']; ?>)</span>
 								</td>
 								<td class="mod-ystides-table-data-col4"
 									title="<?php echo htmlspecialchars($row['hint'], ENT_QUOTES, 'UTF-8'); ?>">

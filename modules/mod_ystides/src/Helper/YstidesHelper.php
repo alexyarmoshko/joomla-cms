@@ -140,7 +140,7 @@ class YstidesHelper
                 // Get moon phases for display range.
                 $moonPhases = $this->moonPhaseHelper->getPhasesForRange(
                     $dbInfo['driver'],
-                    $startDate->format('Y-m-d'),
+                    (clone $startDate)->modify('-1 days')->format('Y-m-d'),
                     $endDate->format('Y-m-d')
                 );
 

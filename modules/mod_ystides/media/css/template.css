@@ -1,8 +1,20 @@
 @charset "UTF-8";
 
 .mod-ystides-table {
-  line-height: 1.5;
-  font-size: 14px;
+  line-height: normal;
+  font-size: 11px;
+}
+
+.mod-ystides-table-data-col2 {
+  font-size: 12px;
+}
+
+.mod-ystides-table-data-col3 {
+  font-size: 16px;
+}
+
+.mod-ystides-table-data-col4 {
+  font-size: 12px;
 }
 
 div.mod-ystides-info {
