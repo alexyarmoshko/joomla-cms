@@ -29,31 +29,27 @@ div.mod-ystides-info div.card div.card-body {
   padding-top: 5ex;
 }
 
-div.ystides-coeff-value-low {
-  background-color: #198754;
-  color: #198754;
+div.ystides-coeff {
   float: right;
   width: 5ex;
+}
+
+div.ystides-coeff-value-low {
+  background-color: #19875435;
+  color: #198754;
 }
 
 div.ystides-coeff-value-average {
-  background-color: #ffc107;
+  background-color: #ffc10735;
   color: #ffc107;
-  float: right;
-  width: 5ex;
 }
 
 div.ystides-coeff-value-high {
-  background-color: #fd7e14cc;
-  background-blend-mode: lighten;
+  background-color: #fd7e1435;
   color: #fd7e14;
-  float: right;
-  width: 5ex;
 }
 
 div.ystides-coeff-value-very-high {
   background-color: #dc354535;
   color: #dc3545;
-  float: right;
-  width: 5ex;
 }

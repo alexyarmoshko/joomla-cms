@@ -114,7 +114,7 @@ $infoId = 'ystides-info-' . $moduleId;
 									title="<?php echo htmlspecialchars($row['tidehint'], ENT_QUOTES, 'UTF-8'); ?>">
 									<span><?php echo $row['wlm']; ?></span>
 									<?php if ($coefValue !== null): ?>
-										<div class="badge ystides-coeff-value-<?php echo $coefColor; ?>"
+										<div class="ystides-coeff ystides-coeff-value-<?php echo $coefColor; ?>"
 											title="<?php echo htmlspecialchars($coefLabel, ENT_QUOTES, 'UTF-8'); ?>">
 											<?php echo (int) $coefValue; ?>
 										</div>
