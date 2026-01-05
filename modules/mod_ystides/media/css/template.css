@@ -32,6 +32,7 @@ div.mod-ystides-info div.card div.card-body {
 div.ystides-coeff {
   float: right;
   width: 5ex;
+  text-align: center;
 }
 
 div.ystides-coeff-value-low {
