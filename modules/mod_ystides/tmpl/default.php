@@ -24,6 +24,7 @@ $stationHeader = $stationName ?? '';
 $dbErrorMessage = $dbError ?? '';
 $fetchErrorMessage = $fetchError ?? '';
 $rowsData = $rows ?? [];
+$headerWarningIcon = $headerWarning ?? null;
 $moduleId = isset($module) ? (int) $module->id : rand(1000, 9999);
 $mainId = 'ystides-main-' . $moduleId;
 $infoId = 'ystides-info-' . $moduleId;
@@ -42,6 +43,14 @@ $infoId = 'ystides-info-' . $moduleId;
 			<div class="d-flex align-items-center justify-content-between mb-2">
 				<div class="fw-semibold">
 					<?php echo Text::sprintf('MOD_YSTIDES_HEADER_DESC', htmlspecialchars($stationHeader, ENT_QUOTES, 'UTF-8')); ?>
+					<?php if ($headerWarningIcon): ?>
+						<a href="https://www.met.ie/warnings-today.html" target="_blank" class="ystides-header-warning">
+							<img src="/media/mod_ystides/images/warning-<?php echo htmlspecialchars($headerWarningIcon, ENT_QUOTES, 'UTF-8'); ?>@2x.png"
+								width="16" height="16" style="margin-top:-2px"
+								title="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $headerWarningIcon))); ?>"
+								alt="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $headerWarningIcon))); ?>">
+						</a>
+					<?php endif; ?>
 				</div>
 				<button type="button" class="btn btn-outline-secondary btn-sm rounded-circle" data-bs-toggle="collapse"
 					data-bs-target=".multi-collapse" aria-controls="<?php echo $infoId; ?>" aria-expanded="false"
@@ -100,10 +109,18 @@ $infoId = 'ystides-info-' . $moduleId;
 												title="<?php echo Text::_('MOD_YSTIDES_MOON_' . strtoupper($row['moonPhase'])); ?>"
 												alt="<?php echo Text::_('MOD_YSTIDES_MOON_' . strtoupper($row['moonPhase'])); ?>">
 										<?php else: ?>
-											<!-- Emprt GIF as space holder for alignment -->
+											<!-- Empty GIF as space holder for alignment -->
 											<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" width="11" />
 										<?php endif; ?>
 										<span><?php echo HTMLHelper::_('date', $row['meandt'], 'j M', 'UTC'); ?></span>
+										<?php if (!empty($row['warningIcon'])): ?>
+											<a href="https://www.met.ie/warnings-today.html" target="_blank" class="ystides-warning-icon">
+												<img src="/media/mod_ystides/images/warning-<?php echo htmlspecialchars($row['warningIcon'], ENT_QUOTES, 'UTF-8'); ?>@2x.png"
+													width="12" height="12" style="margin-top:-2px"
+													title="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $row['warningIcon']))); ?>"
+													alt="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $row['warningIcon']))); ?>">
+											</a>
+										<?php endif; ?>
 									<?php endif; ?>
 								</td>
 								<td class="mod-ystides-table-data-col2"
@@ -144,6 +161,8 @@ $infoId = 'ystides-info-' . $moduleId;
 					<p><?php echo Text::_('MOD_YSTIDES_INFO_4'); ?></p>
 					<p><?php echo Text::_('MOD_YSTIDES_INFO_5'); ?></p>
 					<p><?php echo Text::_('MOD_YSTIDES_INFO_6'); ?></p>
+					<p><?php echo Text::_('MOD_YSTIDES_INFO_7'); ?></p>
+					<p><?php echo Text::_('MOD_YSTIDES_INFO_8'); ?></p>
 				</div>
 			</div>
 		</div>

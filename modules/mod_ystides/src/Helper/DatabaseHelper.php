@@ -150,7 +150,8 @@ CREATE TABLE IF NOT EXISTS TideStations (
     RefStationHWTimeOffset TEXT DEFAULT NULL,
     RefStationLWTimeOffset TEXT DEFAULT NULL,
     RefStationHWLOffset REAL DEFAULT NULL,
-    RefStationLWLOffset REAL DEFAULT NULL
+    RefStationLWLOffset REAL DEFAULT NULL,
+    AreaCodes TEXT DEFAULT NULL
 );
 SQL;
 
@@ -177,7 +178,32 @@ CREATE TABLE IF NOT EXISTS TideMoonPhases (
 );
 SQL;
 
-        foreach ([$stationSql, $dataSql, $indexSql, $moonPhasesSql] as $sql) {
+        $weatherWarningsSql = <<<SQL
+CREATE TABLE IF NOT EXISTS WeatherWarnings (
+    Identifier TEXT PRIMARY KEY,
+    Event TEXT NOT NULL,
+    Category TEXT NOT NULL,
+    Headline TEXT,
+    Description TEXT,
+    Severity TEXT NOT NULL,
+    AwarenessLevel INTEGER DEFAULT 0,
+    Onset TEXT NOT NULL,
+    Expires TEXT NOT NULL,
+    AreaCodes TEXT NOT NULL,
+    RetrievedAt TEXT NOT NULL
+);
+SQL;
+
+        $weatherWarningsMetaSql = <<<SQL
+CREATE TABLE IF NOT EXISTS WeatherWarningsMeta (
+    Key TEXT PRIMARY KEY,
+    Value TEXT NOT NULL
+);
+SQL;
+
+        $warningsIndexSql = 'CREATE INDEX IF NOT EXISTS idx_warnings_onset_expires ON WeatherWarnings (Onset, Expires);';
+
+        foreach ([$stationSql, $dataSql, $indexSql, $moonPhasesSql, $weatherWarningsSql, $weatherWarningsMetaSql, $warningsIndexSql] as $sql) {
             $db->setQuery($sql);
             $db->execute();
         }
@@ -209,7 +235,7 @@ SQL;
      * Seed or update station metadata from an array.
      *
      * @param   DatabaseInterface  $db        Database connection.
-     * @param   array              $stations  Array of associative arrays with keys: StationID, StationName, LonDegE, LatDegN, RefStationID, RefStationHWTimeOffset, RefStationLWTimeOffset, RefStationHWLOffset, RefStationLWLOffset.
+     * @param   array              $stations  Array of associative arrays with keys: StationID, StationName, LonDegE, LatDegN, RefStationID, RefStationHWTimeOffset, RefStationLWTimeOffset, RefStationHWLOffset, RefStationLWLOffset, AreaCodes.
      *
      * @return  void
      *
@@ -231,8 +257,9 @@ INSERT INTO TideStations (
     RefStationHWTimeOffset,
     RefStationLWTimeOffset,
     RefStationHWLOffset,
-    RefStationLWLOffset
-) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    RefStationLWLOffset,
+    AreaCodes
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT(StationID) DO UPDATE SET
     StationName = excluded.StationName,
     LonDegE = excluded.LonDegE,
@@ -241,7 +268,8 @@ ON CONFLICT(StationID) DO UPDATE SET
     RefStationHWTimeOffset = excluded.RefStationHWTimeOffset,
     RefStationLWTimeOffset = excluded.RefStationLWTimeOffset,
     RefStationHWLOffset = excluded.RefStationHWLOffset,
-    RefStationLWLOffset = excluded.RefStationLWLOffset;
+    RefStationLWLOffset = excluded.RefStationLWLOffset,
+    AreaCodes = excluded.AreaCodes;
 SQL;
 
         foreach ($stations as $station) {
@@ -255,6 +283,7 @@ SQL;
                 $this->quoteNullable($db, $station['RefStationLWTimeOffset'] ?? null),
                 $this->quoteNullable($db, $station['RefStationHWLOffset'] ?? null),
                 $this->quoteNullable($db, $station['RefStationLWLOffset'] ?? null),
+                $this->quoteNullable($db, $station['AreaCodes'] ?? null),
             ];
 
             $sql = sprintf($baseSql, ...$values);

@@ -19,6 +19,7 @@ use Joomla\Registry\Registry;
 use Joomla\Module\Ystides\Site\Helper\MoonPhaseHelper;
 use Joomla\Module\Ystides\Site\Helper\StationCatalog;
 use Joomla\Module\Ystides\Site\Helper\TideDataFetcher;
+use Joomla\Module\Ystides\Site\Helper\WeatherWarningHelper;
 use Throwable;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -57,6 +58,14 @@ class YstidesHelper
     private MoonPhaseHelper $moonPhaseHelper;
 
     /**
+     * Weather warning helper.
+     *
+     * @var    WeatherWarningHelper
+     * @since  1.0.3
+     */
+    private WeatherWarningHelper $weatherWarningHelper;
+
+    /**
      * Cached display rows.
      *
      * @var    array
@@ -67,10 +76,11 @@ class YstidesHelper
     /**
      * Constructor.
      *
-     * @param   mixed                 $config           Optional config (ignored when called from HelperFactory).
-     * @param   DatabaseHelper|null   $databaseHelper   Optional database helper for testing/overrides.
-     * @param   TideDataFetcher|null  $tideDataFetcher  Optional fetcher helper for testing/overrides.
-     * @param   MoonPhaseHelper|null  $moonPhaseHelper  Optional moon phase helper for testing/overrides.
+     * @param   mixed                      $config                 Optional config (ignored when called from HelperFactory).
+     * @param   DatabaseHelper|null        $databaseHelper         Optional database helper for testing/overrides.
+     * @param   TideDataFetcher|null       $tideDataFetcher        Optional fetcher helper for testing/overrides.
+     * @param   MoonPhaseHelper|null       $moonPhaseHelper        Optional moon phase helper for testing/overrides.
+     * @param   WeatherWarningHelper|null  $weatherWarningHelper   Optional weather warning helper for testing/overrides.
      *
      * @since   1.0.1
      */
@@ -78,7 +88,8 @@ class YstidesHelper
         $config = null,
         ?DatabaseHelper $databaseHelper = null,
         ?TideDataFetcher $tideDataFetcher = null,
-        ?MoonPhaseHelper $moonPhaseHelper = null
+        ?MoonPhaseHelper $moonPhaseHelper = null,
+        ?WeatherWarningHelper $weatherWarningHelper = null
     ) {
         if ($config instanceof DatabaseHelper && $databaseHelper === null) {
             $databaseHelper = $config;
@@ -87,6 +98,7 @@ class YstidesHelper
         $this->databaseHelper = $databaseHelper ?? new DatabaseHelper();
         $this->tideDataFetcher = $tideDataFetcher ?? new TideDataFetcher();
         $this->moonPhaseHelper = $moonPhaseHelper ?? new MoonPhaseHelper();
+        $this->weatherWarningHelper = $weatherWarningHelper ?? new WeatherWarningHelper();
     }
 
     /**
@@ -144,11 +156,35 @@ class YstidesHelper
                     $endDate->format('Y-m-d')
                 );
 
-                $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate, $moonPhases);
+                // Ensure weather warnings are up to date and get warnings for station.
+                $this->weatherWarningHelper->ensureWarningsUpdated($dbInfo['driver']);
+                $warnings = $this->weatherWarningHelper->getWarningsForStation(
+                    $dbInfo['driver'],
+                    $stationId,
+                    $startDate->format('Y-m-d'),
+                    $endDate->format('Y-m-d')
+                );
+
+                $this->displayRows = $this->loadDisplayRows($dbInfo['driver'], $stationId, $startDate, $endDate, $moonPhases, $warnings);
             } catch (Throwable $exception) {
                 $fetchError = Text::sprintf('MOD_YSTIDES_ERR_FETCH', $exception->getMessage());
                 Factory::getApplication()->enqueueMessage($fetchError, 'warning');
                 Log::add($exception->getMessage(), Log::ERROR, 'mod_ystides');
+            }
+        }
+
+        // Determine header warning - show if any row has a warning
+        $headerWarning = null;
+        foreach ($this->displayRows as $row) {
+            if (!empty($row['warningIcon'])) {
+                $icon = $row['warningIcon'];
+                // Track highest severity for header
+                if ($headerWarning === null) {
+                    $headerWarning = $icon;
+                } else {
+                    // Priority: red > orange > yellow > green > small-craft
+                    $headerWarning = $this->getHigherSeverityIcon($headerWarning, $icon);
+                }
             }
         }
 
@@ -161,7 +197,34 @@ class YstidesHelper
             'dbError' => $dbError,
             'fetchError' => $fetchError,
             'rows' => $this->displayRows,
+            'headerWarning' => $headerWarning,
         ];
+    }
+
+    /**
+     * Get the higher severity icon between two icons.
+     *
+     * @param   string  $icon1  First icon name.
+     * @param   string  $icon2  Second icon name.
+     *
+     * @return  string
+     *
+     * @since   1.0.3
+     */
+    private function getHigherSeverityIcon(string $icon1, string $icon2): string
+    {
+        $priority = [
+            'small-craft' => 1,
+            'green' => 2,
+            'yellow' => 3,
+            'orange' => 4,
+            'red' => 5,
+        ];
+
+        $p1 = $priority[$icon1] ?? 0;
+        $p2 = $priority[$icon2] ?? 0;
+
+        return $p1 >= $p2 ? $icon1 : $icon2;
     }
 
     /**
@@ -186,12 +249,13 @@ class YstidesHelper
      * @param   Date                                $startDate   Start date (UTC).
      * @param   Date                                $endDate     End date (UTC).
      * @param   array<string, string>               $moonPhases  Moon phases keyed by date.
+     * @param   array<string, array>                $warnings    Weather warnings keyed by date.
      *
      * @return  array<int,array<string,mixed>>
      *
      * @since   1.0.1
      */
-    private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate, array $moonPhases = []): array
+    private function loadDisplayRows($db, string $stationId, Date $startDate, Date $endDate, array $moonPhases = [], array $warnings = []): array
     {
         // Stored datetimes use ISO format with "T" and "Z" (e.g. 2025-12-28T12:30:00Z)
         // Start date/time is six hours before to capture the last high/low at the previous day.
@@ -215,10 +279,9 @@ class YstidesHelper
         $rows = $db->loadAssocList();
 
         $grouped = $this->groupByCategoryAndWlm($rows);
-        $moonPhaseHelper = $this->moonPhaseHelper;
 
         return array_map(
-            function ($group) use ($moonPhases, $moonPhaseHelper) {
+            function ($group) use ($moonPhases, $warnings) {
                 $category = $group['category'] ?? '';
                 $coef = (isset($group['coef']) && is_numeric($group['coef'])) ? (int) $group['coef'] : null;
                 $startDT = $group['start'];
@@ -231,6 +294,12 @@ class YstidesHelper
                 // Check for moon phase on this date.
                 $moonPhase = $moonPhases[$dateKey] ?? null;
 
+                // Check for weather warning on this date.
+                $warningIcon = null;
+                if (isset($warnings[$dateKey])) {
+                    $warningIcon = WeatherWarningHelper::getPrimaryWarningIcon($warnings[$dateKey]);
+                }
+
                 return [
                     'titledt' => HTMLHelper::_('date', $startDT, 'DATE_FORMAT_LC5', 'UTC') . ' - ' . HTMLHelper::_('date', $endDT, 'DATE_FORMAT_LC5', 'UTC'),
                     'startdt' => $startDT,
@@ -241,6 +310,7 @@ class YstidesHelper
                     'tidehint' => $this->categorySymbol($category)['label'],
                     'coef' => $coef,
                     'moonPhase' => $moonPhase,
+                    'warningIcon' => $warningIcon,
                     'raw' => $group,
                 ];
             },

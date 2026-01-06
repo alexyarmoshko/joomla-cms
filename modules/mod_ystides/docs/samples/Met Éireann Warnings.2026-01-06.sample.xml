@@ -1,0 +1,72 @@
+
+<?xml version="1.0" encoding="utf-16"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <atom:link rel="self" type="application/rss+xml" href="https://www.met.ie/warnings" />
+    <title>Met Éireann Warnings</title>
+    <link>https://www.met.ie/warnings</link>
+    <description>Warnings issued by Met Éireann. This RSS feed displays valid warnings for land areas only. Sea area warnings will be added at a later date. Clicking the links, loads the CAP (Common Alerting Protocol) XML file.
+Note: Moderate means ‘Status Yellow’, Severe means ‘Status Orange’ and extreme means ‘Status Red’</description>
+    <copyright>Public Domain</copyright>
+    <language>en</language>
+    <item>
+      <title>Small Craft warning from Roche's Point to Bloody Foreland to Wicklow Head</title>
+      <link>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm005_SmallCraft.xml</link>
+      <description>West to northwest winds, backing southwest, will reach force 6 or higher.</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Marine</category>
+      <guid>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm005_SmallCraft.xml</guid>
+      <pubDate>Mon, 05 Jan 2026 05:39:07 GMT</pubDate>
+    </item>
+    <item>
+      <title>Small Craft warning for all coasts of Ireland</title>
+      <link>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm004_SmallCraft.xml</link>
+      <description>Southwest to west winds, veering northwest, will reach force 6 or higher.</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Marine</category>
+      <guid>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm004_SmallCraft.xml</guid>
+      <pubDate>Mon, 05 Jan 2026 05:39:07 GMT</pubDate>
+    </item>
+    <item>
+      <title>Small Craft warning for all coasts of Ireland</title>
+      <link>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm003_SmallCraft.xml</link>
+      <description>Northwest winds will reach force 6 or higher.</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Marine</category>
+      <guid>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm003_SmallCraft.xml</guid>
+      <pubDate>Mon, 05 Jan 2026 05:39:07 GMT</pubDate>
+    </item>
+    <item>
+      <title>Low Temperature/Ice warning for Leinster, Cavan, Monaghan, Munster, Galway, Roscommon</title>
+      <link>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm000_Weather.xml</link>
+      <description>Temperatures falling to between -1 and -3 degrees generally. 
+Sharp frost and icy stretches.
+Black ice too. 
+
+Impacts:
+
+Treacherous travel conditions</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Weather</category>
+      <guid>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm000_Weather.xml</guid>
+      <pubDate>Mon, 05 Jan 2026 08:56:49 GMT</pubDate>
+    </item>
+    <item>
+      <title>Snow-Ice warning for Donegal, Leitrim, Mayo, Sligo</title>
+      <link>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm001_Weather.xml</link>
+      <description>Wintry showers with sleet and some snow accumulations.
+Sharp frost and ice also.
+
+Impacts:
+
+Hazardous Travel conditions
+Poor visibility</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Weather</category>
+      <guid>https://cap.met.ie//2.49.0.1.372.0.260105175600.N_Norm001_Weather.xml</guid>
+      <pubDate>Mon, 05 Jan 2026 08:56:49 GMT</pubDate>
+    </item>
+    <atom:link href="https://www.met.ie/warningsxml/rss.xml" rel="self" 
+       type="application/rss+xml" />
+  </channel>
+</rss>
