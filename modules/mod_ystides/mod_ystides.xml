@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<authorEmail>me@kayakshaver.com</authorEmail>
 	<authorUrl>https://www.kayakshaver.com</authorUrl>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<description>MOD_YSTIDES_XML_DESCRIPTION</description>
 	<namespace path="src">Joomla\Module\Ystides</namespace>
 	<files>
