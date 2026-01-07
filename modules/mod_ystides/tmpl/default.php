@@ -47,7 +47,7 @@ $infoId = 'ystides-info-' . $moduleId;
 					<?php if ($headerWarningIcon): ?>
 						<a href="https://www.met.ie/warnings-today.html" target="_blank" class="ystides-header-warning">
 							<img src="/media/mod_ystides/images/warning-<?php echo htmlspecialchars($headerWarningIcon, ENT_QUOTES, 'UTF-8'); ?>@2x.png"
-								width="18" height="18" style="margin-top:-2px"
+								width="18" height="18" style="margin-top:-2px; display:inline;"
 								title="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $headerWarningIcon))); ?>"
 								alt="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $headerWarningIcon))); ?>">
 						</a>
@@ -106,18 +106,19 @@ $infoId = 'ystides-info-' . $moduleId;
 									<?php if ($prevMeanD !== $row['meand']): ?>
 										<?php if (!empty($row['moonPhase'])): ?>
 											<img src="/media/mod_ystides/images/moon-<?php echo $row['moonPhase']; ?>-details.svg"
-												width="14" height="14" style="margin-top:-3px"
+												width="14" height="14" style="margin-top:-3px; display:inline;"
 												title="<?php echo Text::_('MOD_YSTIDES_MOON_' . strtoupper($row['moonPhase'])); ?>"
 												alt="<?php echo Text::_('MOD_YSTIDES_MOON_' . strtoupper($row['moonPhase'])); ?>">
 										<?php else: ?>
 											<!-- Empty GIF as space holder for alignment -->
-											<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" width="11" />
+											<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" width="11"
+												style="display:inline" />
 										<?php endif; ?>
 										<span><?php echo HTMLHelper::_('date', $row['meandt'], 'j M', 'UTC'); ?></span>
 										<?php if (!empty($row['warningIcon'])): ?>
 											<a href="https://www.met.ie/warnings-today.html" target="_blank" class="ystides-warning-icon">
 												<img src="/media/mod_ystides/images/warning-<?php echo htmlspecialchars($row['warningIcon'], ENT_QUOTES, 'UTF-8'); ?>@2x.png"
-													width="12" height="12" style="margin-top:-2px"
+													width="12" height="12" style="margin-top:-2px; display:inline;"
 													title="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $row['warningIcon']))); ?>"
 													alt="<?php echo Text::_('MOD_YSTIDES_WARNING_' . strtoupper(str_replace('-', '_', $row['warningIcon']))); ?>">
 											</a>
