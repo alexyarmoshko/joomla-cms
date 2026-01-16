@@ -2,12 +2,12 @@
 <extension type="module" client="site" method="upgrade">
 	<name>Yak Shaver Tides</name>
 	<author>Yak Shaver</author>
-	<creationDate>2025-12-28</creationDate>
-	<copyright>(C) 2025 Yak Shaver https://www.kayakshaver.com</copyright>
+	<creationDate>2026-01-16</creationDate>
+	<copyright>(C) 2026 Yak Shaver https://www.kayakshaver.com</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<authorEmail>me@kayakshaver.com</authorEmail>
 	<authorUrl>https://www.kayakshaver.com</authorUrl>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<description>MOD_YSTIDES_XML_DESCRIPTION</description>
 	<namespace path="src">Joomla\Module\Ystides</namespace>
 	<files>

@@ -4,15 +4,15 @@
         <description>Displays tidal information for a selected tide station using ERDDAP data.</description>
         <element>mod_ystides</element>
         <type>module</type>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
         <client>site</client>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/alexyarmoshko/joomla_mod_ystides/releases/download/1.0.4-rc4/mod_ystides-v1-0-4.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/alexyarmoshko/joomla_mod_ystides/releases/download/1.0.5/mod_ystides-v1-0-5.zip</downloadurl>
         </downloads>
         <tags>
             <tag>stable</tag>
         </tags>
-        <sha256>28c1425841e08366ccc7c65f9115ac8badb4627cf608bb37de7e4bc9fb3434d4</sha256>
+        <sha256>06ed20ec7e348ca9d6a3f0c126b0695da6392113e42f12a7d64d8ed441d8cb65</sha256>
         <targetplatform name="joomla" version="((4\.4)|(5\.(0|1|2|3|4|5|6|7|8|9)))" />
     </update>
 </updates>
